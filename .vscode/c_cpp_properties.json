@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "GBA",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/*",
+                "${workspaceFolder}/lib"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "compilerPath": "C:\\devkitPro\\devkitARM\\bin\\arm-none-eabi-gcc.exe"
+        }
+    ],
+    "version": 4
+}

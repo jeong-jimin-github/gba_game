@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "res.h": "c",
+        "m3func.h": "c",
+        "k6x10.h": "c",
+        "gba.h": "c"
+    }
+}
