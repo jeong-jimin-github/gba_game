@@ -86,16 +86,13 @@ void PlayMusic(SONG* s1, SONG* s2)
     if (song_ch1 == NULL && s1 != NULL) {
         song_ch1 = s1;
         idx_ch1 = 0;
-        timer_ch1 = 0;
     }
 
     if (song_ch2 == NULL && s2 != NULL) {
         song_ch2 = s2;
         idx_ch2 = 0;
-        timer_ch2 = 0;
     }
 
-    // ----- ?? 1 ?? -----
     if (song_ch1 && idx_ch1 < song_ch1->size && timer_ch1 <= 0) {
         param_data1.frequency = song_ch1->freq[idx_ch1];
 
@@ -116,7 +113,6 @@ void PlayMusic(SONG* s1, SONG* s2)
         idx_ch1++;
     }
 
-    // ----- ?? 2 ?? -----
     if (song_ch2 && idx_ch2 < song_ch2->size && timer_ch2 <= 0) {
         param_data2.frequency = song_ch2->freq[idx_ch2];
 
@@ -142,7 +138,6 @@ void PlayMusic(SONG* s1, SONG* s2)
     timer_ch1--;
     timer_ch2--;
 
-    // ?? ?? X ¨ ??? ??
     if (song_ch1 && idx_ch1 >= song_ch1->size)
         song_ch1 = NULL;
     if (song_ch2 && idx_ch2 >= song_ch2->size)
