@@ -166,7 +166,7 @@ void InitBullets()
         bullet[i].y = GROUND_Y;
 
         SpriteSetSize(11 + i, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
-        SpriteSetChr(11 + i, 32);
+        SpriteSetChr(11 + i, 36);
         SpriteMove(11 + i, 240, 160);
     }
 }
@@ -225,7 +225,7 @@ void UpdateBullets()
     }
 
     for (int i = 0; i < BULLET_MAX; i++) {
-        bullet[i].x -= 3;
+        bullet[i].x -= 1;
     }
 }
 
@@ -298,10 +298,8 @@ void Game_Update()
         if (vx > MOVE_MAX) vx = MOVE_MAX;
     }
     else if (key & KEY_LEFT) {
-        if(px - cameraX>0){
-            vx -= MOVE_ACC;
-            if (vx < -MOVE_MAX) vx = -MOVE_MAX;
-        }
+        vx -= MOVE_ACC;
+        if (vx < -MOVE_MAX) vx = -MOVE_MAX;
     }
     else {
         if (vx > 0) vx -= FRICTION;
@@ -309,6 +307,10 @@ void Game_Update()
     }
 
     px += vx;
+
+    if(px-cameraX < 0) {
+        px = cameraX;
+    }
 
     if (key & KEY_A) {
         if (py == GROUND_Y) vy = JUMP_VEL;
@@ -367,6 +369,7 @@ void Game_Draw()
         int bx = bullet[i].x - cameraX;
         int by = bullet[i].y;
         if ((bx < px - cameraX +32 && bx > px - cameraX) && (by >= py && by < py + 32)) {
+            MgbaLog("Game Over");
             currentScene = SCENE_MENU;
             StopMusic();
             SetMode(MODE_3 | BG2_ENABLE);

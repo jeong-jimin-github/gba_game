@@ -46,7 +46,7 @@ void Menu_Update() {
 
     if(pressed_keys & KEY_A) {
         if(cursor == 0) {
-            currentScene = SCENE_GAME;     // Start
+            currentScene = SCENE_GAME;
             ChangeScene(currentScene);
         } else if(cursor == 1) {
             currentScene = SCENE_SETTING;
