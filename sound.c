@@ -79,6 +79,8 @@ void InitMusic()
     song_idx2 = 0;
     song_timer1 = 0;
     song_timer2 = 0;
+    timer_ch1 = 0;
+    timer_ch2 = 0;
 }
 
 void PlayMusic(SONG* s1, SONG* s2)
