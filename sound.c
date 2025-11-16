@@ -1,5 +1,4 @@
 #include "sound.h"
-#include "lib/gba.h"
 
 u16 freq[12*6] = {
 	// C      C+       D      D+       E       F      F+       G      G+       A      A+       B
@@ -51,22 +50,16 @@ static PARAM param_data2 = {
     .resampling_frequency = 0x3,
 };
 
-static u16 song_freq[] = {
-    10, 17, 12, 17, 13, 15, 17, 15, 20, 22, 17, 24, 25, 24, 25, 24, 22, 20, 17, 20, 15, 17, 13,
-    10, 17, 12, 17, 13, 15, 17, 15, 20, 22, 17, 24, 25, 24, 25, 24, 22, 20, 22
-};
 
-static int song_length[] = {
-    4,4,4,4,4,2,2,4,4,2,2,2,2,2,1,1,2,2,2,2,2,2,8,4,4,4,4,4,2,2,4,4,2,2,2,2,2,1,1,2,2,16
-};
 
-static u16 song_freq2[] = {    
-    6, 8, 10, 7, 6, 8, 10, 6, 8, 10, 7, 6, 8, 10
-};
+static SONG* song_ch1 = NULL;
+static SONG* song_ch2 = NULL;
 
-static int song_length2[] = {
-    8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 16
-};
+static int idx_ch1 = 0;
+static int idx_ch2 = 0;
+
+static int timer_ch1 = 0;
+static int timer_ch2 = 0;
 
 #define SONG1_LEN 42
 #define SONG2_LEN 14
@@ -88,57 +81,78 @@ void InitMusic()
     song_timer2 = 0;
 }
 
-void PlayMusic()
+void PlayMusic(SONG* s1, SONG* s2)
 {
-    if (song_idx1 < SONG1_LEN && song_timer1 <= 0) {
-        param_data1.frequency = song_freq[song_idx1] + 24;
+    if (song_ch1 == NULL && s1 != NULL) {
+        song_ch1 = s1;
+        idx_ch1 = 0;
+        timer_ch1 = 0;
+    }
+
+    if (song_ch2 == NULL && s2 != NULL) {
+        song_ch2 = s2;
+        idx_ch2 = 0;
+        timer_ch2 = 0;
+    }
+
+    // ----- ?? 1 ?? -----
+    if (song_ch1 && idx_ch1 < song_ch1->size && timer_ch1 <= 0) {
+        param_data1.frequency = song_ch1->freq[idx_ch1];
 
         u16 B, L, H, X;
         B = (param_data1.resampling_frequency<<14) + (REG_SOUNDBIAS & 0x3fff);
         L =  (param_data1.sweep_time<<4) + (param_data1.sweep_direction<<3) + (param_data1.sweep_shift);
         H = (param_data1.initial_volume<<12) + (param_data1.envelope_direction<<11)
-        + (param_data1.envelope_direction<<8) + (param_data1.envelope_step_time<<6)
-        + (param_data1.length);
+          + (param_data1.envelope_direction<<8) + (param_data1.envelope_step_time<<6)
+          + (param_data1.length);
         X = (param_data1.length_enable<<14) + freq[param_data1.frequency];
+
         REG_SOUNDBIAS = B;
         REG_SOUND1CNT_L = L;
         REG_SOUND1CNT_H = H;
         REG_SOUND1CNT_X = X + TRIFREQ_RESET;
 
-        song_timer1 = song_length[song_idx1] * 5;
-        song_idx1++;
+        timer_ch1 = song_ch1->length[idx_ch1] * 5;
+        idx_ch1++;
     }
 
-    if (song_idx2 < SONG2_LEN && song_timer2 <= 0) {
-        param_data2.frequency = song_freq2[song_idx2];
+    // ----- ?? 2 ?? -----
+    if (song_ch2 && idx_ch2 < song_ch2->size && timer_ch2 <= 0) {
+        param_data2.frequency = song_ch2->freq[idx_ch2];
 
         u16 B2, L2, H2;
         B2 = (param_data2.resampling_frequency<<14) + (REG_SOUNDBIAS & 0x3fff);
-        L2 =  (param_data2.initial_volume<<12) + (param_data2.envelope_direction<<11)
-            + (param_data2.envelope_step_time<< 8) + (param_data2.duty_cycle<< 6)
+
+        L2 =  (param_data2.initial_volume<<12)
+            + (param_data2.envelope_direction<<11)
+            + (param_data2.envelope_step_time<< 8)
+            + (param_data2.duty_cycle<< 6)
             + (param_data2.length);
-        H2 = (0x0<<14) + freq[param_data2.frequency];
+
+        H2 = freq[param_data2.frequency];
+
         REG_SOUNDBIAS = B2;
         REG_SOUND2CNT_L = L2;
         REG_SOUND2CNT_H = H2 + TRIFREQ_RESET;
 
-        song_timer2 = song_length2[song_idx2] * 5;
-        song_idx2++;
+        timer_ch2 = song_ch2->length[idx_ch2] * 5;
+        idx_ch2++;
     }
 
-    song_timer1--;
-    song_timer2--;
+    timer_ch1--;
+    timer_ch2--;
 
-    if (song_idx1 >= SONG1_LEN && song_idx2 >= SONG2_LEN) {
-        song_idx1 = 0;
-        song_idx2 = 0;
-        song_timer1 = 80;
-        song_timer2 = 80;
-    }
+    // ?? ?? X ¨ ??? ??
+    if (song_ch1 && idx_ch1 >= song_ch1->size)
+        song_ch1 = NULL;
+    if (song_ch2 && idx_ch2 >= song_ch2->size)
+        song_ch2 = NULL;
 }
 
 void StopMusic()
 {
+    song_ch1 = NULL;
+    song_ch2 = NULL;
     REG_SOUNDCNT_X = 0x00;
     REG_SOUND1CNT_L = 0;
     REG_SOUND1CNT_H = 0;

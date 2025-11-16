@@ -2,12 +2,13 @@
 #include "scene.h"
 #include "m3func.h"
 #include "k6x10.h"
-#include "sound.h" // sound.h ??
+#include "sound.h"
+#include "music.h"
 
 extern int currentScene;
 
 static ST_FONT f;
-static u16 prev_key_input_credit = 0; // Credit ?? ?? ? ??? ??? ??
+static u16 prev_key_input_credit = 0;
 
 void Credit_Init(int scene) {
     if(scene != SCENE_CREDIT) return;
@@ -24,13 +25,13 @@ void Credit_Init(int scene) {
     }
 
     Mode3DrawString(&f, 10, 50, "Made by Jeong Jimin", RGB5(31,31,31));
-    InitMusic(); // ?? ???
+    InitMusic();
 }
 
 void Credit_Update() {
     if(currentScene != SCENE_CREDIT) return;
 
-    PlayMusic();
+    PlayMusic(&un_owen_was_her_1, &un_owen_was_her_2);
 
     u16 current_key_input = REG_KEYINPUT;
     u16 pressed_keys = ~current_key_input & prev_key_input_credit; 

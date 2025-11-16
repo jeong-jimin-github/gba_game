@@ -4,7 +4,10 @@
 #include "res.h"
 #include "gameres.h"
 #include "sound.h"
+#include "music.h"
 #define BG_MAX_CNT 4
+#define ENERMY_MAX 3
+#define DANMAKU_MAX 20
 
 typedef struct {
     u32  mapBase;
@@ -12,6 +15,11 @@ typedef struct {
     u32  tileBase;
     u16* tileBaseAdr;
 } ST_BG;
+
+typedef struct {
+    u32  x;
+    u32  y;
+} PositionDat;
 
 ST_BG Bg[BG_MAX_CNT];
 
@@ -54,7 +62,6 @@ void BgInitMem(void)
 void BgInit(void)
 {
     BgInitMem();
-
     REG_BG0CNT  = (BG_SIZE_0 | BG_256_COLOR | Bg[0].tileBase | Bg[0].mapBase | 0);
 }
 
@@ -114,6 +121,14 @@ s32 vy = 0;
 
 s32 vx = 0;
 
+// --- ìGï®ï®óùïœêî ---
+int enermy = ENERMY_MAX;
+PositionDat enermyPosition[ENERMY_MAX];
+
+// --- íeñãï®óùïœêî ---
+int danmaku = DANMAKU_MAX;
+PositionDat danmakuPosition[DANMAKU_MAX];
+
 const int GROUND_Y = 104;
 
 const int GRAV_ACC = 1;
@@ -125,6 +140,10 @@ const int MOVE_MAX = 3;        // ç≈ëÂë¨ìx
 const int FRICTION = 1;        // ñÄéC
 
 int cameraX = 0;
+
+int danmakutimer = 0;
+int enermytimer = 0;
+
 
 void Game_Init(int scene) {
     SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP | BG0_ON);
@@ -148,7 +167,7 @@ void Game_Init(int scene) {
     u32 i;
 
     for(i=0; i<spr1TilesLen/2; i++) oam[i] = spr1Tiles[i];
-    for(i=0; i<16; i++) pal[i] = spr1Pal[i];
+    for(i=0; i<256; i++) pal[i] = spr1Pal[i];
 
     BgInit();
     Bg0SetTile((u16*)&bg0Tiles, bg0TilesLen/2);
@@ -167,6 +186,23 @@ void Game_Init(int scene) {
     SpriteSetSize(0, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
     SpriteSetChr (0, 0);
     SpriteMove   (0, x, y);
+
+    for(int enm = 1; enm < 1 + enermy; enm++){
+        SpriteSetSize(enm, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
+        SpriteSetChr (enm, 16);
+        enermyPosition[enm-1].x = 0;
+        enermyPosition[enm-1].y = GROUND_Y;
+        SpriteMove(enm, 0, GROUND_Y);
+    }
+
+    for(int dnm = 11; dnm < 11 + danmaku; dnm++){
+        SpriteSetSize(dnm, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
+        SpriteSetChr (dnm, 32);
+        danmakuPosition[dnm-11].x = 0;
+        danmakuPosition[dnm-11].y = GROUND_Y;
+        SpriteMove(dnm, 0, GROUND_Y);
+    }
+
 	InitMusic();
 }
 
@@ -175,6 +211,7 @@ void Game_Update() {
 
     if(!(REG_KEYINPUT & KEY_SELECT)) {
         currentScene = SCENE_MENU;
+        StopMusic();
         SetMode(MODE_3 | BG2_ENABLE);
         ChangeScene(currentScene);
         return;
@@ -184,6 +221,7 @@ void Game_Update() {
 
     if(key & KEY_RIGHT) {
         vx += MOVE_ACC;
+        enermytimer++;
         if(vx > MOVE_MAX) vx = MOVE_MAX;
     }
     else if(key & KEY_LEFT) {
@@ -227,11 +265,49 @@ void Game_Update() {
 		REG_BG0HOFS = cameraX;
 	}
 
-	PlayMusic();
+    if (danmakutimer >= 30) {
+        for (int ii = 0; ii < enermy; ii++) {
+            s32 enemy_x = enermyPosition[ii].x;
+            if (enemy_x > (cameraX - 16) && enemy_x < (cameraX + 240)) 
+            {
+                for (int i = 0; i < danmaku; i++) { 
+                    if (danmakuPosition[i].x < cameraX - 240) { 
+                        danmakuPosition[i].x = enermyPosition[ii].x;
+                        break;
+                    }
+                }
+            }
+        }
+
+        danmakutimer = 0;
+
+    }
+
+    for (int i = 0; i < danmaku; i++) {
+        danmakuPosition[i].x -= 3;
+    }
+
+    if (enermytimer > 300) {
+        for (int i = 0; i < enermy; i++) {
+            if (enermyPosition[i].x < cameraX - 240) {
+                enermyPosition[i].x = x + 130;
+                break;
+            }
+        }
+        enermytimer = 0;
+    }
+
+    danmakutimer++;
+	PlayMusic(&unreal_superhero_3_1, &unreal_superhero_3_2);
 }
 
 void Game_Draw() {
     if(currentScene != SCENE_GAME) return;
-
     SpriteMove(0, x - cameraX, y);
+    for(int i = 0; i<enermy; i++){
+        SpriteMove(1+i, enermyPosition[i].x - cameraX, enermyPosition[i].y);
+    }
+    for(int ii = 0; ii<danmaku; ii++){
+        SpriteMove(11+ii, danmakuPosition[ii].x - cameraX, danmakuPosition[ii].y);
+    }
 }
