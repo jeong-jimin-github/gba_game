@@ -24,6 +24,6 @@ void Game_Init(int scene);
 void Game_Update();
 void Game_Draw();
 
-extern void ChangeScene(int next); // ChangeScene ?? ????? ??
+extern void ChangeScene(int next);
 
 #endif
