@@ -1,6 +1,5 @@
 #include "lib/gba.h"
 #include "m3func.h"
-#include "blue.h"
 #include "scene.h"
 
 int currentScene = SCENE_MENU;
