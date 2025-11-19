@@ -3,6 +3,7 @@
 
 
 #include "res/mplus_j10r.h"
+#include "res/menubg.h"
 
 extern const char mplus_jfnt_txt;
 

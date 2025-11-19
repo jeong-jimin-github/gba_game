@@ -5,6 +5,7 @@
 #include "gameres.h"
 #include "sound.h"
 #include "music.h"
+#include "k6x10.h"
 
 #define BG_MAX_CNT   4
 #define ENEMY_MAX    3
@@ -13,6 +14,8 @@
 #define ENEMY_SPACING     240
 #define ENEMY_DESPAWN_L   120
 #define RESPAWN_AHEAD     320
+
+static ST_FONT f;
 
 typedef struct {
     s32 x;
@@ -241,11 +244,12 @@ void Game_Init(int scene)
     f_JP.pSheet= (u16*)&mplus_jfnt_txt;
     f_JP.cnt   = 6963;
 
-    if (scene != SCENE_GAME) return;
+    f.pDat  = (u8*)&k6x10Bitmap;
+    f.imgCx = 960;
+    f.cx    = 6;
+    f.cy    = 10;
 
-    for (int i = 0; i < 240; i++)
-        for (int j = 0; j < 160; j++)
-            Mode3PutPixel(i, j, RGB5(31,31,31));
+    if (scene != SCENE_GAME) return;
 
     u16* oam = OBJ_BASE_ADR;
     u16* pal = OBJ_COLORS;
@@ -275,6 +279,33 @@ void Game_Init(int scene)
     InitBullets();
 
     InitMusic();
+}
+
+void GameOver()
+{
+    StopMusic();
+    SetMode(MODE_3 | BG2_ENABLE);
+    for (int i = 0; i < 240; i++)
+        for (int j = 0; j < 160; j++)
+            Mode3PutPixel(i, j, RGB5(0,0,0));
+    Mode3DrawString(&f, 80, 70, "Game Over", RGB5(31,31,31));
+    Mode3DrawSJISStr(&f_JP, 10, 90, "もう一度プレイ", RGB5(31,31,31));
+    Mode3DrawSJISStr(&f_JP, 10, 110, "メニュー画面に戻る", RGB5(31,31,31));
+    Mode3DrawSJISStr(&f_JP, 160, 90, "スタートボタン", RGB5(31,31,31));
+    Mode3DrawSJISStr(&f_JP, 160, 110, "セレクトボタン", RGB5(31,31,31));
+
+    while(1){
+        u32 key = ~(REG_KEYINPUT);
+        if (key & KEY_SELECT) {
+            currentScene = SCENE_MENU;
+            ChangeScene(currentScene);
+            break;
+        }
+
+        if (key & KEY_START) {
+            Game_Init(SCENE_GAME);
+            break;
+    }}
 }
 
 /* ---------------- Game Update ---------------- */
@@ -369,11 +400,7 @@ void Game_Draw()
         int bx = bullet[i].x - cameraX;
         int by = bullet[i].y;
         if ((bx < px - cameraX +32 && bx > px - cameraX) && (by >= py && by < py + 32)) {
-            MgbaLog("Game Over");
-            currentScene = SCENE_MENU;
-            StopMusic();
-            SetMode(MODE_3 | BG2_ENABLE);
-            ChangeScene(currentScene);
+            GameOver();
         }
     }
 }
