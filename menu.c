@@ -31,7 +31,7 @@ void Menu_Update() {
 
     if(pressed_keys & KEY_UP) {
         if(cursor > 0) {
-            PlayFX(12);
+            PlayFX(7);
             cursor--;
         }
         else {
@@ -40,7 +40,7 @@ void Menu_Update() {
     }
     if(pressed_keys & KEY_DOWN) {
         if(cursor < 2){
-            PlayFX(12);
+            PlayFX(7);
             cursor++;
         }
         else {
@@ -71,7 +71,7 @@ void Menu_Draw() {
     u16 col_t = (cursor==1)? RGB5(31, 0, 0) : RGB5(0, 0, 0);
     u16 col_c = (cursor==2)? RGB5(31, 0, 0) : RGB5(0, 0, 0);
 
-    Mode3DrawSJISStr(&f_JP, 100,110, "始める", col_s);
+    Mode3DrawSJISStr(&f_JP, 100,110, "スタート", col_s);
     Mode3DrawSJISStr(&f_JP, 100,125, "設定", col_t);
     Mode3DrawSJISStr(&f_JP, 100,140, "クレジット", col_c);
 }

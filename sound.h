@@ -8,8 +8,15 @@ typedef struct {
     int size;
 } SONG;
 
+typedef struct {
+    SONG* song_ch1;
+    SONG* song_ch2;
+    SONG* song_ch3;
+    SONG* song_ch4;
+} MUSIC_PLAYER;
+
 void InitMusic();
-void PlayMusic(SONG* s1, SONG* s2, SONG* s4);
+void PlayMusic(MUSIC_PLAYER* music_player);
 void PlayFX(int pitch);
 void StopMusic();
 

@@ -6,17 +6,20 @@
 #include "sound.h"
 #include "music.h"
 
+//---------------- 定数定義 ----------------
+
 #define BG_MAX_CNT   4
-#define ENEMY_MAX    3
-#define BULLET_MAX   10
+#define ENEMY_MAX    3 // 画面に表示される敵の最大数
+#define BULLET_MAX   10 // 画面に表示される弾の最大数
 
-#define ENEMY_SPACING     240
-#define ENEMY_DESPAWN_L   120
-#define RESPAWN_AHEAD     320
+#define ENEMY_SPACING     240 // 敵の出現間隔
+#define ENEMY_DESPAWN_L   120 // 敵の消える位置
+#define RESPAWN_AHEAD     320 // 敵の再出現位置（X座標）
 
-static ST_FONT f;
+//---------------- 構造体定義 ----------------
 
-typedef struct {
+typedef struct
+{
     s32 x;
     s32 y;
 } ObjPos;
@@ -30,9 +33,6 @@ typedef struct
     int isActive;
 } Weapon;
 
-Weapon weapon;
-
-
 typedef struct {
     u32  mapBase;
     u16* mapBaseAdr;
@@ -40,35 +40,41 @@ typedef struct {
     u16* tileBaseAdr;
 } ST_BG;
 
+//---------------- グローバル変数 ----------------
+
+static ST_FONT f; // ローマ字フォント
+static ST_FONT f_JP; // 日本語フォント
+
+Weapon weapon;
 ST_BG Bg[BG_MAX_CNT];
 
 extern int currentScene;
-static ST_FONT f_JP;
 
-const int GROUND_Y = 104;
+const int GROUND_Y = 104; // 地面のY座標
+const int GRAV_ACC = 1;
+const int JUMP_VEL = -14;
+const int MAX_FALL = 10;
 
+const int MOVE_ACC = 1; // 移動加速度
+const int MOVE_MAX = 3;
+const int FRICTION = 1; // 摩擦による減速
+
+int cameraX = 0;
+int bulletTimer = 0;
+int enemyRespawnTimer = 0;
+
+// ---------------- プレイヤー位置・速度 ----------------
 s32 px = 0;
 s32 py = GROUND_Y;
 s32 vx = 0;
 s32 vy = 0;
 
-const int GRAV_ACC = 1;
-const int JUMP_VEL = -14;
-const int MAX_FALL = 10;
-
-const int MOVE_ACC = 1;
-const int MOVE_MAX = 3;
-const int FRICTION = 1;
-
-int cameraX = 0;
+// ---------------- 敵・弾位置 ----------------
 
 ObjPos enemy[ENEMY_MAX];
 ObjPos bullet[BULLET_MAX];
 
-int bulletTimer = 0;
-int enemyRespawnTimer = 0;
-
-/* ---------------- BG Initialization ---------------- */
+//---------------- 背景関連 ----------------
 
 void BgInitMem(void)
 {
@@ -125,7 +131,7 @@ void Bg0SetMap(u16* pDat, u32 size)
     for (i = 0; i < size; i++) Bg[0].mapBaseAdr[i] = pDat[i];
 }
 
-/* ---------------- Sprite ---------------- */
+//---------------- スプライト関連 ----------------
 
 void SpriteMove(u32 num, s32 x, s32 y)
 {
@@ -158,7 +164,7 @@ void SpriteInit(void)
     for (i = 0; i < 128; i++) SpriteMove(i, 240, 160);
 }
 
-/* ---------------- Enemy / Bullet Init ---------------- */
+//---------------- 敵・弾初期化・更新 ----------------
 
 void InitEnemies()
 {
@@ -184,6 +190,60 @@ void InitBullets()
         SpriteMove(11 + i, 240, 160);
     }
 }
+
+void UpdateEnemies()
+{
+    if (enemyRespawnTimer > 300) {
+        s32 farthest = enemy[0].x;
+        for (int i = 1; i < ENEMY_MAX; i++) {
+            if (enemy[i].x > farthest) farthest = enemy[i].x;
+        }
+
+        for (int i = 0; i < ENEMY_MAX; i++) {
+            if (enemy[i].x < cameraX - ENEMY_DESPAWN_L) {
+                if (farthest < cameraX + RESPAWN_AHEAD)
+                    farthest = cameraX + RESPAWN_AHEAD;
+
+                enemy[i].x = farthest + ENEMY_SPACING;
+                enemy[i].y = GROUND_Y;
+                break;
+            }
+        }
+        enemyRespawnTimer = 0;
+    }
+}
+
+void SpawnBullet(s32 ex, s32 ey)
+{
+    for (int i = 0; i < BULLET_MAX; i++) {
+        if (bullet[i].x < cameraX - 60) {
+            bullet[i].x = ex;
+            bullet[i].y = ey;
+            return;
+        }
+    }
+}
+
+void UpdateBullets()
+{
+    bulletTimer++;
+
+    if (bulletTimer >= 100) {
+        for (int i = 0; i < ENEMY_MAX; i++) {
+            int sx = enemy[i].x - cameraX;
+            if (sx >= 0 && sx < 240) {
+                SpawnBullet(enemy[i].x, enemy[i].y);
+            }
+        }
+        bulletTimer = 0;
+    }
+
+    for (int i = 0; i < BULLET_MAX; i++) {
+        bullet[i].x -= 1;
+    }
+}
+
+//---------------- 武器初期化・更新 ----------------
 
 void WeaponInit(Weapon* w)
 {
@@ -238,65 +298,34 @@ void WeaponUpdate(Weapon* w)
     }}
 }
 
-/* ---------------- Enemy Update ---------------- */
-
-void UpdateEnemies()
+void GameOver()
 {
-    if (enemyRespawnTimer > 300) {
-        s32 farthest = enemy[0].x;
-        for (int i = 1; i < ENEMY_MAX; i++) {
-            if (enemy[i].x > farthest) farthest = enemy[i].x;
+    StopMusic();
+    SetMode(MODE_3 | BG2_ENABLE);
+    for (int i = 0; i < 240; i++)
+        for (int j = 0; j < 160; j++)
+            Mode3PutPixel(i, j, RGB5(0,0,0));
+    Mode3DrawString(&f, 80, 70, "Game Over", RGB5(31,31,31));
+    Mode3DrawSJISStr(&f_JP, 10, 90, "もう一度プレイ", RGB5(31,31,31));
+    Mode3DrawSJISStr(&f_JP, 10, 110, "メニュー画面に戻る", RGB5(31,31,31));
+    Mode3DrawSJISStr(&f_JP, 160, 90, "スタートボタン", RGB5(31,31,31));
+    Mode3DrawSJISStr(&f_JP, 160, 110, "セレクトボタン", RGB5(31,31,31));
+
+    while(1){
+        u32 key = ~(REG_KEYINPUT);
+        if (key & KEY_SELECT) {
+            currentScene = SCENE_MENU;
+            ChangeScene(currentScene);
+            break;
         }
 
-        for (int i = 0; i < ENEMY_MAX; i++) {
-            if (enemy[i].x < cameraX - ENEMY_DESPAWN_L) {
-                if (farthest < cameraX + RESPAWN_AHEAD)
-                    farthest = cameraX + RESPAWN_AHEAD;
-
-                enemy[i].x = farthest + ENEMY_SPACING;
-                enemy[i].y = GROUND_Y;
-                break;
-            }
-        }
-        enemyRespawnTimer = 0;
-    }
+        if (key & KEY_START) {
+            Game_Init(SCENE_GAME);
+            break;
+    }}
 }
 
-/* ---------------- Bullet Spawn ---------------- */
-
-void SpawnBullet(s32 ex, s32 ey)
-{
-    for (int i = 0; i < BULLET_MAX; i++) {
-        if (bullet[i].x < cameraX - 60) {
-            bullet[i].x = ex;
-            bullet[i].y = ey;
-            return;
-        }
-    }
-}
-
-/* ---------------- Bullet Update ---------------- */
-
-void UpdateBullets()
-{
-    bulletTimer++;
-
-    if (bulletTimer >= 100) {
-        for (int i = 0; i < ENEMY_MAX; i++) {
-            int sx = enemy[i].x - cameraX;
-            if (sx >= 0 && sx < 240) {
-                SpawnBullet(enemy[i].x, enemy[i].y);
-            }
-        }
-        bulletTimer = 0;
-    }
-
-    for (int i = 0; i < BULLET_MAX; i++) {
-        bullet[i].x -= 1;
-    }
-}
-
-/* ---------------- Game Init ---------------- */
+//---------------- ゲーム初期化・更新・描画 ----------------
 
 void Game_Init(int scene)
 {
@@ -345,35 +374,6 @@ void Game_Init(int scene)
 
     InitMusic();
 }
-
-void GameOver()
-{
-    StopMusic();
-    SetMode(MODE_3 | BG2_ENABLE);
-    for (int i = 0; i < 240; i++)
-        for (int j = 0; j < 160; j++)
-            Mode3PutPixel(i, j, RGB5(0,0,0));
-    Mode3DrawString(&f, 80, 70, "Game Over", RGB5(31,31,31));
-    Mode3DrawSJISStr(&f_JP, 10, 90, "もう一度プレイ", RGB5(31,31,31));
-    Mode3DrawSJISStr(&f_JP, 10, 110, "メニュー画面に戻る", RGB5(31,31,31));
-    Mode3DrawSJISStr(&f_JP, 160, 90, "スタートボタン", RGB5(31,31,31));
-    Mode3DrawSJISStr(&f_JP, 160, 110, "セレクトボタン", RGB5(31,31,31));
-
-    while(1){
-        u32 key = ~(REG_KEYINPUT);
-        if (key & KEY_SELECT) {
-            currentScene = SCENE_MENU;
-            ChangeScene(currentScene);
-            break;
-        }
-
-        if (key & KEY_START) {
-            Game_Init(SCENE_GAME);
-            break;
-    }}
-}
-
-/* ---------------- Game Update ---------------- */
 
 void Game_Update()
 {
@@ -439,14 +439,8 @@ void Game_Update()
     UpdateBullets();
     WeaponUpdate(&weapon);
 
-    PlayMusic(&unreal_superhero_3_1, &unreal_superhero_3_2, &un_owen_was_her_4);
-
-    char buf[64];
-    _Sprintf(buf, "Game Update: Weapon%d", weapon.isActive);
-    MgbaLog(buf);
+    PlayMusic(&UnrealSuperHero3);
 }
-
-/* ---------------- Game Draw ---------------- */
 
 void Game_Draw()
 {
