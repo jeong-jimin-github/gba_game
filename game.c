@@ -21,6 +21,18 @@ typedef struct {
     s32 y;
 } ObjPos;
 
+typedef struct
+{
+    s32 x;
+    s32 y;
+    s32 vx;
+    s32 vy;
+    int isActive;
+} Weapon;
+
+Weapon weapon;
+
+
 typedef struct {
     u32  mapBase;
     u16* mapBaseAdr;
@@ -173,6 +185,59 @@ void InitBullets()
     }
 }
 
+void WeaponInit(Weapon* w)
+{
+    w->isActive = 0;
+    SpriteSetSize(40, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetChr(40, 40);
+    w->x = px;
+    w->y = py;
+    SpriteMove(40, w->x - cameraX, w->y);
+}
+
+void WeaponUpdate(Weapon* w)
+{
+    if (w->isActive == 1) {
+        w->vx += MOVE_ACC;
+        if (w->vx > MOVE_MAX) w->vx = MOVE_MAX;
+        w->x += w->vx;
+        if(w->x < cameraX - 16 || w->x > cameraX + 240){
+            w->isActive = 2;
+        }
+    }
+    if(w->isActive == 2){
+        if((w->x > px - 10 && w->x < px + 10)  &&  (w->y > py - 10 && w->y < py + 10)){
+            w->isActive = 0;
+            w->x = px;
+            w->y = py;
+        }
+        if(w->x > px){
+            w->vx -= MOVE_ACC;
+            if (w->vx < -MOVE_MAX) w->vx = -MOVE_MAX;
+        }
+        if (w->x < px)
+        {
+            w->vx += MOVE_ACC;
+            if (w->vx > MOVE_MAX) w->vx = MOVE_MAX;
+        }
+        if(w->y < py){
+            w->vy += MOVE_ACC;
+            if (w->vy > MOVE_MAX) w->vy = MOVE_MAX;
+        }
+        if (w->y > py)
+        {
+            w->vy -= MOVE_ACC;
+            if (w->vy < -MOVE_MAX) w->vy = -MOVE_MAX;
+        }
+        w->x += w->vx;
+        w->y += w->vy;
+    }
+    if(w->isActive == 0){ {
+        w->x = px;
+        w->y = py;
+    }}
+}
+
 /* ---------------- Enemy Update ---------------- */
 
 void UpdateEnemies()
@@ -270,12 +335,13 @@ void Game_Init(int scene)
 
     SpriteInit();
 
-    SpriteSetSize(0, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
-    SpriteSetChr (0, 0);
-    SpriteMove   (0, px, py);
+    SpriteSetSize(50, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetChr (50, 0);
+    SpriteMove   (50, px, py);
 
     InitEnemies();
     InitBullets();
+    WeaponInit(&weapon);
 
     InitMusic();
 }
@@ -323,6 +389,12 @@ void Game_Update()
 
     u32 key = ~(REG_KEYINPUT);
 
+    if(key & KEY_B) {
+        if(weapon.isActive == 0){
+            weapon.isActive = 1;
+        }
+    }
+
     if (key & KEY_RIGHT) {
         vx += MOVE_ACC;
         if (vx > MOVE_MAX) vx = MOVE_MAX;
@@ -365,8 +437,13 @@ void Game_Update()
 
     UpdateEnemies();
     UpdateBullets();
+    WeaponUpdate(&weapon);
 
     PlayMusic(&unreal_superhero_3_1, &unreal_superhero_3_2, &un_owen_was_her_4);
+
+    char buf[64];
+    _Sprintf(buf, "Game Update: Weapon%d", weapon.isActive);
+    MgbaLog(buf);
 }
 
 /* ---------------- Game Draw ---------------- */
@@ -375,7 +452,8 @@ void Game_Draw()
 {
     if (currentScene != SCENE_GAME) return;
 
-    SpriteMove(0, px - cameraX, py);
+    SpriteMove(50, px - cameraX, py);
+    SpriteMove(40, weapon.x - cameraX, weapon.y);
 
     for (int i = 0; i < ENEMY_MAX; i++) {
         int sx = enemy[i].x - cameraX;
