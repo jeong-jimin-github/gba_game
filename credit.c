@@ -1,8 +1,8 @@
 #include "lib/gba.h"
 #include "scene.h"
 #include "m3func.h"
-#include "k6x10.h"
 #include "sound.h"
+#include "res.h"
 #include "music.h"
 
 extern int currentScene;
@@ -31,7 +31,7 @@ void Credit_Init(int scene) {
 void Credit_Update() {
     if(currentScene != SCENE_CREDIT) return;
 
-    PlayMusic(&un_owen_was_her_1, &un_owen_was_her_2);
+    PlayMusic(&un_owen_was_her_1, &un_owen_was_her_2, &un_owen_was_her_4);
 
     u16 current_key_input = REG_KEYINPUT;
     u16 pressed_keys = ~current_key_input & prev_key_input_credit; 

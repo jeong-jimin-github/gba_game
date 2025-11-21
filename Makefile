@@ -32,6 +32,7 @@ CFILES	= \
 	$(wildcard snd/*.c) \
 	$(wildcard lib/*.c) \
 	$(wildcard *.c) \
+	$(wildcard mid/gen/*.c) \
 
 VPATH = $(dir $(CFILES) $(SFILES))
 

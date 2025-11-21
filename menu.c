@@ -2,7 +2,6 @@
 #include "scene.h"
 #include "m3func.h"
 #include "res.h"
-#include "k6x10.h"
 #include "sound.h"
 
 extern int currentScene;

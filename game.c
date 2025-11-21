@@ -5,7 +5,6 @@
 #include "gameres.h"
 #include "sound.h"
 #include "music.h"
-#include "k6x10.h"
 
 #define BG_MAX_CNT   4
 #define ENEMY_MAX    3
@@ -367,7 +366,7 @@ void Game_Update()
     UpdateEnemies();
     UpdateBullets();
 
-    PlayMusic(&unreal_superhero_3_1, &unreal_superhero_3_2);
+    PlayMusic(&unreal_superhero_3_1, &unreal_superhero_3_2, &un_owen_was_her_4);
 }
 
 /* ---------------- Game Draw ---------------- */

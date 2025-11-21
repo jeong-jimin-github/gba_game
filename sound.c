@@ -49,25 +49,38 @@ static PARAM param_data2 = {
     .length_enable = 0x0,
     .resampling_frequency = 0x3,
 };
-
+static PARAM param_data4 = {
+    .length = 0x0,
+    .envelope_step_time = 0x7,
+    .envelope_direction = 0x0,
+    .initial_volume = 0xF,
+    .frequency = 0x6,
+    .counter_step = 0x1,
+    .shift_freqency = 0x3,
+    .length_enable = 0x0,
+    .resampling_frequency = 0x3,
+};
 
 
 static SONG* song_ch1 = NULL;
 static SONG* song_ch2 = NULL;
+static SONG* song_ch4 = NULL;
 
 static int idx_ch1 = 0;
 static int idx_ch2 = 0;
+static int idx_ch4 = 0;
 
 static int timer_ch1 = 0;
 static int timer_ch2 = 0;
-
-#define SONG1_LEN 42
-#define SONG2_LEN 14
+static int timer_ch4 = 0;
 
 static int song_idx1 = 0;
 static int song_idx2 = 0;
+static int song_idx4 = 0;
 static int song_timer1 = 0;
 static int song_timer2 = 0;
+static int song_timer4 = 0;
+
 
 void InitMusic()
 {
@@ -77,13 +90,16 @@ void InitMusic()
 
     song_idx1 = 0;
     song_idx2 = 0;
+    song_idx4 = 0;
     song_timer1 = 0;
     song_timer2 = 0;
+    song_timer4 = 0;
     timer_ch1 = 0;
     timer_ch2 = 0;
+    timer_ch4 = 0;
 }
 
-void PlayMusic(SONG* s1, SONG* s2)
+void PlayMusic(SONG* s1, SONG* s2, SONG* s4)
 {
     if (song_ch1 == NULL && s1 != NULL) {
         song_ch1 = s1;
@@ -93,6 +109,11 @@ void PlayMusic(SONG* s1, SONG* s2)
     if (song_ch2 == NULL && s2 != NULL) {
         song_ch2 = s2;
         idx_ch2 = 0;
+    }
+
+    if (song_ch4 == NULL && s4 != NULL) {
+        song_ch4 = s4;
+        idx_ch4 = 0;
     }
 
     if (song_ch1 && idx_ch1 < song_ch1->size && timer_ch1 <= 0) {
@@ -111,7 +132,7 @@ void PlayMusic(SONG* s1, SONG* s2)
         REG_SOUND1CNT_H = H;
         REG_SOUND1CNT_X = X + TRIFREQ_RESET;
 
-        timer_ch1 = song_ch1->length[idx_ch1] * 5;
+        timer_ch1 = song_ch1->length[idx_ch1] * 2;
         idx_ch1++;
     }
 
@@ -123,8 +144,8 @@ void PlayMusic(SONG* s1, SONG* s2)
 
         L2 =  (param_data2.initial_volume<<12)
             + (param_data2.envelope_direction<<11)
-            + (param_data2.envelope_step_time<< 8)
-            + (param_data2.duty_cycle<< 6)
+            + (param_data2.envelope_step_time<<8)
+            + (param_data2.duty_cycle<<6)
             + (param_data2.length);
 
         H2 = freq[param_data2.frequency];
@@ -133,23 +154,56 @@ void PlayMusic(SONG* s1, SONG* s2)
         REG_SOUND2CNT_L = L2;
         REG_SOUND2CNT_H = H2 + TRIFREQ_RESET;
 
-        timer_ch2 = song_ch2->length[idx_ch2] * 5;
+        timer_ch2 = song_ch2->length[idx_ch2] * 2;
         idx_ch2++;
+    }
+
+    if (song_ch4 && idx_ch4 < song_ch4->size && timer_ch4 <= 0) {
+        if(song_ch4->freq[idx_ch4] == 0){
+            param_data4.frequency = 10;
+        }
+        if(song_ch4->freq[idx_ch4] == 1){
+            param_data4.frequency = 30;
+        }
+
+        u16 B4, L4, H4;
+        B4 = (param_data4.resampling_frequency<<14) + (REG_SOUNDBIAS & 0x3fff);
+
+        L4 =  (param_data4.initial_volume<<12)
+            + (param_data4.envelope_direction<<11)
+            + (param_data4.envelope_step_time<< 8)
+            + (param_data4.length);
+
+        H4 = (param_data4.length_enable<<14)
+           + (param_data4.shift_freqency<<4)
+           + (param_data4.counter_step<<3)
+           + (param_data4.frequency);
+
+        REG_SOUNDBIAS = B4;
+        REG_SOUND4CNT_L = L4;
+        REG_SOUND4CNT_H = H4 + TRIFREQ_RESET;
+
+        timer_ch4 = song_ch4->length[idx_ch4] * 2;
+        idx_ch4++;
     }
 
     timer_ch1--;
     timer_ch2--;
+    timer_ch4--;
 
     if (song_ch1 && idx_ch1 >= song_ch1->size)
         song_ch1 = NULL;
     if (song_ch2 && idx_ch2 >= song_ch2->size)
         song_ch2 = NULL;
+    if (song_ch4 && idx_ch4 >= song_ch4->size)
+        song_ch4 = NULL;
 }
 
 void StopMusic()
 {
     song_ch1 = NULL;
     song_ch2 = NULL;
+    song_ch4 = NULL;
     REG_SOUNDCNT_X = 0x00;
     REG_SOUND1CNT_L = 0;
     REG_SOUND1CNT_H = 0;

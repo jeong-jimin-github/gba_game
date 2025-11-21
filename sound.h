@@ -9,7 +9,7 @@ typedef struct {
 } SONG;
 
 void InitMusic();
-void PlayMusic(SONG* s1, SONG* s2);
+void PlayMusic(SONG* s1, SONG* s2, SONG* s4);
 void PlayFX(int pitch);
 void StopMusic();
 
