@@ -24,7 +24,8 @@ void Credit_Init(int scene) {
         }
     }
 
-    Mode3DrawString(&f, 10, 50, "Made by Jeong Jimin", RGB5(31,31,31));
+    Mode3DrawString(&f, 60, 50, "Made by Jeong Jimin", RGB5(31,31,31));
+    Mode3DrawString(&f, 5, 80, "github.com/jeong-jimin-github/gba_game", RGB5(31,31,31));
     InitMusic();
 }
 

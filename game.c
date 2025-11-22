@@ -248,10 +248,10 @@ void UpdateBullets()
 void WeaponInit(Weapon* w)
 {
     w->isActive = 0;
-    SpriteSetSize(40, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
-    SpriteSetChr(40, 40);
+    SpriteSetSize(40, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetChr(40, 64);
     w->x = px;
-    w->y = py;
+    w->y = py + 8;
     SpriteMove(40, w->x - cameraX, w->y);
 }
 
@@ -266,10 +266,10 @@ void WeaponUpdate(Weapon* w)
         }
     }
     if(w->isActive == 2){
-        if((w->x > px - 10 && w->x < px + 10)  &&  (w->y > py - 10 && w->y < py + 10)){
+        if((w->x > px - 32 && w->x < px + 32)  &&  (w->y > py - 32 && w->y < py + 32)){
             w->isActive = 0;
             w->x = px;
-            w->y = py;
+            w->y = py + 8;
         }
         if(w->x > px){
             w->vx -= MOVE_ACC;
@@ -280,11 +280,11 @@ void WeaponUpdate(Weapon* w)
             w->vx += MOVE_ACC;
             if (w->vx > MOVE_MAX) w->vx = MOVE_MAX;
         }
-        if(w->y < py){
+        if(w->y < py + 8){
             w->vy += MOVE_ACC;
             if (w->vy > MOVE_MAX) w->vy = MOVE_MAX;
         }
-        if (w->y > py)
+        if (w->y > py + 8)
         {
             w->vy -= MOVE_ACC;
             if (w->vy < -MOVE_MAX) w->vy = -MOVE_MAX;
@@ -294,7 +294,7 @@ void WeaponUpdate(Weapon* w)
     }
     if(w->isActive == 0){ {
         w->x = px;
-        w->y = py;
+        w->y = py + 8;
     }}
 }
 
@@ -305,7 +305,7 @@ void GameOver()
     for (int i = 0; i < 240; i++)
         for (int j = 0; j < 160; j++)
             Mode3PutPixel(i, j, RGB5(0,0,0));
-    Mode3DrawString(&f, 80, 70, "Game Over", RGB5(31,31,31));
+    Mode3DrawString(&f, 100, 70, "Game Over", RGB5(31,31,31));
     Mode3DrawSJISStr(&f_JP, 10, 90, "もう一度プレイ", RGB5(31,31,31));
     Mode3DrawSJISStr(&f_JP, 10, 110, "メニュー画面に戻る", RGB5(31,31,31));
     Mode3DrawSJISStr(&f_JP, 160, 90, "スタートボタン", RGB5(31,31,31));
