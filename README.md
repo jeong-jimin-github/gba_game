@@ -8,10 +8,8 @@ CŒ¾ŒêŠwK‚Ì‚½‚ß‚ÌƒQ[ƒ€ƒ{[ƒCEƒAƒhƒoƒ“ƒX(GBA) Œü‚¯‚ÌƒQ[ƒ€ŠJ”­ƒvƒƒWƒFƒNƒg‚Å‚·
 i¡Œã’Ç‰Á—\’èj
 
 ## TODO
-E“G‚Ì”íŒ‚”»’è‚Ìì¬<br>
 EƒXƒRƒAWŒv‹@”\’Ç‰Á<br>
 EÅ‚ƒXƒRƒA•Û‘¶A•\¦‹@”\’Ç‰Á<br>
-EƒmƒCƒY‚Ìƒhƒ‰ƒ€‚ª•s©‘R[„ƒxƒƒVƒeƒB[‚ğ’²ß‚Å‚«‚é‚æ‚¤‚É‚·‚é<br>
 EƒLƒƒƒ‰ƒNƒ^[‚Ìƒhƒbƒg‚Ì•\¦‚ª•s©‘R<br>
 E•Ší‚ª‹A‚Á‚Ä‚­‚é“r’†‚Éã‰º‚Ék‚¦‚é[„‰Á‘¬“x”’l•ÏX<br>
 EŠÖ”–¼‚Ì“ˆê<br>
@@ -29,5 +27,5 @@ make
 ```
 
 ## Ql‚É‚µ‚½ƒEƒFƒuƒTƒCƒg
-https://akkera102.sakura.ne.jp/gbadev/
+https://akkera102.sakura.ne.jp/gbadev/<br>
 https://problemkaputt.de/gbatek.htm

@@ -295,11 +295,11 @@ void WeaponUpdate(Weapon* w)
             w->vx += MOVE_ACC_WEAPON;
             if (w->vx > MOVE_MAX) w->vx = MOVE_MAX_WEAPON;
         }
-        if(w->y < py + 8){
+        if(w->y < py + 16){
             w->vy += MOVE_ACC_WEAPON;
             if (w->vy > MOVE_MAX_WEAPON) w->vy = MOVE_MAX_WEAPON;
         }
-        if (w->y > py + 8)
+        if (w->y > py + 16)
         {
             w->vy -= MOVE_ACC_WEAPON;
             if (w->vy < -MOVE_MAX_WEAPON) w->vy = -MOVE_MAX_WEAPON;
@@ -326,7 +326,7 @@ void GameOver()
     for (int i = 0; i < 240; i++)
         for (int j = 0; j < 160; j++)
             Mode3PutPixel(i, j, RGB5(0,0,0));
-    Mode3DrawString(&f, 100, 70, "Game Over", RGB5(31,31,31));
+    Mode3DrawString(&f, 90, 70, "Game Over", RGB5(31,31,31));
     Mode3DrawSJISStr(&f_JP, 10, 90, "もう一度プレイ", RGB5(31,31,31));
     Mode3DrawSJISStr(&f_JP, 10, 110, "メニュー画面に戻る", RGB5(31,31,31));
     Mode3DrawSJISStr(&f_JP, 160, 90, "スタートボタン", RGB5(31,31,31));
