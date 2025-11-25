@@ -5,15 +5,15 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/*",
-                "${workspaceFolder}/lib"
+                "${workspaceFolder}/lib",
+                "${workspaceFolder}"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "configurationProvider": "ms-vscode.makefile-tools",
-            "compilerPath": "C:\\devkitPro\\devkitARM\\bin\\arm-none-eabi-gcc.exe"
+            "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
     "version": 4

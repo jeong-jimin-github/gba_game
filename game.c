@@ -30,6 +30,7 @@ typedef struct
     s32 y;
     s32 vx;
     s32 vy;
+    s32 LR; // 0:左 1:右
     int isActive;
 } Weapon;
 
@@ -59,8 +60,11 @@ const int MOVE_ACC = 1; // 移動加速度
 const int MOVE_MAX = 3;
 const int FRICTION = 1; // 摩擦による減速
 
+const int MOVE_ACC_WEAPON = 2; // 武器の移動加速度
+const int MOVE_MAX_WEAPON = 6;
+
 int cameraX = 0;
-int bulletTimer = 0;
+int bulletTimer = 100;
 int enemyRespawnTimer = 0;
 
 // ---------------- プレイヤー位置・速度 ----------------
@@ -68,6 +72,7 @@ s32 px = 0;
 s32 py = GROUND_Y;
 s32 vx = 0;
 s32 vy = 0;
+s32 pLR = 1; // 0:左 1:右
 
 // ---------------- 敵・弾位置 ----------------
 
@@ -258,11 +263,21 @@ void WeaponInit(Weapon* w)
 void WeaponUpdate(Weapon* w)
 {
     if (w->isActive == 1) {
-        w->vx += MOVE_ACC;
-        if (w->vx > MOVE_MAX) w->vx = MOVE_MAX;
-        w->x += w->vx;
-        if(w->x < cameraX - 16 || w->x > cameraX + 240){
-            w->isActive = 2;
+        if(w->LR == 0){
+            w->vx -= MOVE_ACC_WEAPON;
+            if (w->vx < -MOVE_MAX_WEAPON) w->vx = -MOVE_MAX_WEAPON;
+            w->x += w->vx;
+            if(w->x < cameraX){
+                w->isActive = 2;
+            }
+        }
+        if (w->LR == 1){
+            w->vx += MOVE_ACC_WEAPON;
+            if (w->vx > MOVE_MAX_WEAPON) w->vx = MOVE_MAX_WEAPON;
+            w->x += w->vx;
+            if(w->x > cameraX + 240){
+                w->isActive = 2;
+            }
         }
     }
     if(w->isActive == 2){
@@ -272,27 +287,33 @@ void WeaponUpdate(Weapon* w)
             w->y = py + 8;
         }
         if(w->x > px){
-            w->vx -= MOVE_ACC;
-            if (w->vx < -MOVE_MAX) w->vx = -MOVE_MAX;
+            w->vx -= MOVE_ACC_WEAPON;
+            if (w->vx < -MOVE_MAX_WEAPON) w->vx = -MOVE_MAX_WEAPON;
         }
         if (w->x < px)
         {
-            w->vx += MOVE_ACC;
-            if (w->vx > MOVE_MAX) w->vx = MOVE_MAX;
+            w->vx += MOVE_ACC_WEAPON;
+            if (w->vx > MOVE_MAX) w->vx = MOVE_MAX_WEAPON;
         }
         if(w->y < py + 8){
-            w->vy += MOVE_ACC;
-            if (w->vy > MOVE_MAX) w->vy = MOVE_MAX;
+            w->vy += MOVE_ACC_WEAPON;
+            if (w->vy > MOVE_MAX_WEAPON) w->vy = MOVE_MAX_WEAPON;
         }
         if (w->y > py + 8)
         {
-            w->vy -= MOVE_ACC;
-            if (w->vy < -MOVE_MAX) w->vy = -MOVE_MAX;
+            w->vy -= MOVE_ACC_WEAPON;
+            if (w->vy < -MOVE_MAX_WEAPON) w->vy = -MOVE_MAX_WEAPON;
         }
         w->x += w->vx;
         w->y += w->vy;
     }
     if(w->isActive == 0){ {
+        if(pLR == 0){
+        SpriteSetChr(40, 80);
+        }
+        if(pLR == 1){
+            SpriteSetChr(40, 64);
+        }
         w->x = px;
         w->y = py + 8;
     }}
@@ -391,15 +412,18 @@ void Game_Update()
 
     if(key & KEY_B) {
         if(weapon.isActive == 0){
+            weapon.LR = pLR;
             weapon.isActive = 1;
         }
     }
 
     if (key & KEY_RIGHT) {
+        pLR = 1;
         vx += MOVE_ACC;
         if (vx > MOVE_MAX) vx = MOVE_MAX;
     }
     else if (key & KEY_LEFT) {
+        pLR = 0;
         vx -= MOVE_ACC;
         if (vx < -MOVE_MAX) vx = -MOVE_MAX;
     }
@@ -428,8 +452,8 @@ void Game_Update()
         vy = 0;
     }
 
-    if (px - cameraX > 120) {
-        cameraX = px - 120;
+    if (px - cameraX > 80) {
+        cameraX = px - 80;
         if (cameraX < 0) cameraX = 0;
         REG_BG0HOFS = cameraX;
     }
@@ -455,6 +479,15 @@ void Game_Draw()
             SpriteMove(1 + i, 240, 160);
         } else {
             SpriteMove(1 + i, sx, enemy[i].y);
+        }
+    }
+
+    if(weapon.isActive == 1 || weapon.isActive == 2){
+        for (int ii = 0; ii < ENEMY_MAX; ii++) {
+            if((weapon.x - cameraX < enemy[ii].x - cameraX +32 && weapon.x - cameraX > enemy[ii].x - cameraX) && (weapon.y >= enemy[ii].y && weapon.y < enemy[ii].y + 32))
+            {
+                enemy[ii].x = cameraX - ENEMY_DESPAWN_L - 100;
+            }
         }
     }
 
