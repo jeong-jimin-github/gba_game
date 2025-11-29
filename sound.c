@@ -88,12 +88,12 @@ typedef struct {
 } PARAM;
 
 static PARAM param_data1 = {
-    .sweep_shift = 0x6,
-    .sweep_direction = 0x1,
-    .sweep_time = 0x1,
+    .sweep_shift = 0x0,
+    .sweep_direction = 0x0,
+    .sweep_time = 0x0,
     .length = 0x0,
     .duty_cycle = 0x0,
-    .envelope_step_time = 0x7,
+    .envelope_step_time = 0x0,
     .envelope_direction = 0x0,
     .initial_volume = 0x08,
     .frequency = 0x0,
@@ -159,6 +159,9 @@ static int song_timer3 = 0;
 static int song_timer4 = 0;
 
 u32 PanMask = 0x4000;
+
+int speed = 3;
+int plus_speed = 5;
 
 void LoadWave(PARAM* p, u32 select)
 {
@@ -235,6 +238,26 @@ void PlayMusic(MUSIC_PLAYER* music_player)
     }
 
     if (song_ch1 && idx_ch1 < song_ch1->size && timer_ch1 <= 0) {
+        if (song_ch1->freq[idx_ch1] == 0) {
+            // rest
+            REG_SOUND1CNT_L = 0;
+            REG_SOUND1CNT_H = 0;
+            REG_SOUND1CNT_X = 0;
+            timer_ch1 = song_ch1->length[idx_ch1] * speed;
+            idx_ch1++;
+            return;
+        }
+
+        if(song_ch1->freq[idx_ch1] == 130) {
+            param_data1.sweep_shift = 0x7;
+            param_data1.sweep_direction = 0x1;
+            param_data1.sweep_time = 0x7;
+            param_data1.frequency = 8;
+        } else {
+            param_data1.sweep_shift = 0x0;
+            param_data1.sweep_direction = 0x0;
+            param_data1.sweep_time = 0x0;
+        }
         param_data1.frequency = song_ch1->freq[idx_ch1];
 
         u16 B, L, H, X;
@@ -250,11 +273,20 @@ void PlayMusic(MUSIC_PLAYER* music_player)
         REG_SOUND1CNT_H = H;
         REG_SOUND1CNT_X = X + TRIFREQ_RESET;
 
-        timer_ch1 = song_ch1->length[idx_ch1] * 2;
+        timer_ch1 = song_ch1->length[idx_ch1] * speed;
         idx_ch1++;
     }
 
     if (song_ch2 && idx_ch2 < song_ch2->size && timer_ch2 <= 0) {
+        if (song_ch2->freq[idx_ch2] == 0) {
+            // rest
+            REG_SOUND2CNT_L = 0;
+            REG_SOUND2CNT_H = 0;
+            timer_ch2 = song_ch2->length[idx_ch2] * speed;
+            idx_ch2++;
+            return;
+        }
+        
         param_data2.frequency = song_ch2->freq[idx_ch2];
 
         u16 B2, L2, H2;
@@ -272,20 +304,38 @@ void PlayMusic(MUSIC_PLAYER* music_player)
         REG_SOUND2CNT_L = L2;
         REG_SOUND2CNT_H = H2 + TRIFREQ_RESET;
 
-        timer_ch2 = song_ch2->length[idx_ch2] * 2;
+        timer_ch2 = song_ch2->length[idx_ch2] * speed;
         idx_ch2++;
     }
 
     if (song_ch3 && idx_ch3 < song_ch3->size && timer_ch3 <= 0) {
+        if(song_ch3->freq[idx_ch3] == 0) {
+            // rest
+            REG_SOUND3CNT_H = 0;
+            REG_SOUND3CNT_X = 0;
+            timer_ch3 = song_ch3->length[idx_ch3] * speed;
+            idx_ch3++;
+            return;
+        }
+
         param_data3.frequency = song_ch3->freq[idx_ch3];
         REG_SOUND3CNT_H = TRILENVOL_100 | param_data3.sound_length;
 		REG_SOUND3CNT_X = freq[param_data3.frequency] | TRIFREQ_TIMED | TRIFREQ_RESET;
 
-        timer_ch3 = song_ch3->length[idx_ch3] * 2;
+        timer_ch3 = song_ch3->length[idx_ch3] * speed;
         idx_ch3++;
     }
 
     if (song_ch4 && idx_ch4 < song_ch4->size && timer_ch4 <= 0) {
+        if(song_ch4->freq[idx_ch4] == 0) {
+            // rest
+            REG_SOUND4CNT_L = 0;
+            REG_SOUND4CNT_H = 0;
+            timer_ch4 = song_ch4->length[idx_ch4] * speed;
+            idx_ch4++;
+            return;
+        }
+
         param_data4.frequency = 40;
 
         if(song_ch4->freq[idx_ch4] == 1) {
@@ -309,7 +359,7 @@ void PlayMusic(MUSIC_PLAYER* music_player)
         REG_SOUND4CNT_L = L4;
         REG_SOUND4CNT_H = H4 + TRIFREQ_RESET;
 
-        timer_ch4 = song_ch4->length[idx_ch4] * 2;
+        timer_ch4 = song_ch4->length[idx_ch4] * speed;
         idx_ch4++;
     }
 
