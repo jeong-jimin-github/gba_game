@@ -51,7 +51,7 @@ ST_BG Bg[BG_MAX_CNT];
 
 extern int currentScene;
 
-const int GROUND_Y = 104; // 地面のY座標
+const int GROUND_Y = 104;
 const int GRAV_ACC = 1;
 const int JUMP_VEL = -14;
 const int MAX_FALL = 10;
@@ -69,7 +69,7 @@ int enemyRespawnTimer = 0;
 
 // ---------------- プレイヤー位置・速度 ----------------
 s32 px = 0;
-s32 py = GROUND_Y;
+s32 py = GROUND_Y - 24;
 s32 vx = 0;
 s32 vy = 0;
 s32 pLR = 1; // 0:左 1:右
@@ -138,6 +138,15 @@ void Bg0SetMap(u16* pDat, u32 size)
 
 //---------------- スプライト関連 ----------------
 
+void SpriteMirror(u32 num, u32 flag)
+{
+    OBJATTR* sp = (OBJATTR*)OAM + num;
+    if (flag)
+        sp->attr1 |= (1 << 12);
+    else
+        sp->attr1 &= ~(1 << 12);
+}
+
 void SpriteMove(u32 num, s32 x, s32 y)
 {
     OBJATTR* sp = (OBJATTR*)OAM + num;
@@ -178,7 +187,7 @@ void InitEnemies()
         enemy[i].y = GROUND_Y;
 
         SpriteSetSize(1 + i, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
-        SpriteSetChr(1 + i, 16);
+        SpriteSetChr(1 + i, 32);
 
         SpriteMove(1 + i, 240, 160);
     }
@@ -191,7 +200,7 @@ void InitBullets()
         bullet[i].y = GROUND_Y;
 
         SpriteSetSize(11 + i, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
-        SpriteSetChr(11 + i, 36);
+        SpriteSetChr(11 + i, 96);
         SpriteMove(11 + i, 240, 160);
     }
 }
@@ -256,7 +265,7 @@ void WeaponInit(Weapon* w)
     SpriteSetSize(40, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
     SpriteSetChr(40, 64);
     w->x = px;
-    w->y = py + 8;
+    w->y = py + 24;
     SpriteMove(40, w->x - cameraX, w->y);
 }
 
@@ -284,7 +293,7 @@ void WeaponUpdate(Weapon* w)
         if((w->x > px - 32 && w->x < px + 32)  &&  (w->y > py - 32 && w->y < py + 32)){
             w->isActive = 0;
             w->x = px;
-            w->y = py + 8;
+            w->y = py + 24;
         }
         if(w->x > px){
             w->vx -= MOVE_ACC_WEAPON;
@@ -309,13 +318,13 @@ void WeaponUpdate(Weapon* w)
     }
     if(w->isActive == 0){ {
         if(pLR == 0){
-        SpriteSetChr(40, 80);
+            SpriteMirror(40, 1);
         }
         if(pLR == 1){
-            SpriteSetChr(40, 64);
+            SpriteMirror(40, 0);
         }
         w->x = px;
-        w->y = py + 8;
+        w->y = py + 24;
     }}
 }
 
@@ -377,7 +386,7 @@ void Game_Init(int scene)
     Bg0SetMap ((u16*)&ResBg0Map, BG0_MAP_SIZE/2);
 
     px = 0;
-    py = GROUND_Y;
+    py = GROUND_Y - 24;
     vx = 0;
     vy = 0;
 
@@ -385,7 +394,7 @@ void Game_Init(int scene)
 
     SpriteInit();
 
-    SpriteSetSize(50, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetSize(50, OBJ_SIZE(3), OBJ_TALL, OBJ_16_COLOR);
     SpriteSetChr (50, 0);
     SpriteMove   (50, px, py);
 
@@ -439,7 +448,7 @@ void Game_Update()
     }
 
     if (key & KEY_A) {
-        if (py == GROUND_Y) vy = JUMP_VEL;
+        if (py == GROUND_Y - 24) vy = JUMP_VEL;
     }
 
     vy += GRAV_ACC;
@@ -447,8 +456,8 @@ void Game_Update()
 
     py += vy;
 
-    if (py >= GROUND_Y) {
-        py = GROUND_Y;
+    if (py >= GROUND_Y - 24) {
+        py = GROUND_Y - 24;
         vy = 0;
     }
 
@@ -458,6 +467,13 @@ void Game_Update()
         REG_BG0HOFS = cameraX;
     }
     enemyRespawnTimer++;
+
+    if(pLR == 0){
+        SpriteMirror(50, 1);
+    }
+    if(pLR == 1){
+        SpriteMirror(50, 0);
+    }
 
     UpdateEnemies();
     UpdateBullets();
