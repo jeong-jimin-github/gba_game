@@ -184,12 +184,12 @@ void InitEnemies()
 {
     for (int i = 0; i < ENEMY_MAX; i++) {
         enemy[i].x = 200 + ENEMY_SPACING * i;
-        enemy[i].y = GROUND_Y;
+        enemy[i].y = GROUND_Y - 24;
 
-        SpriteSetSize(1 + i, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
+        SpriteSetSize(1 + i, OBJ_SIZE(3), OBJ_TALL, OBJ_16_COLOR);
         SpriteSetChr(1 + i, 32);
-
         SpriteMove(1 + i, 240, 160);
+        SpriteMirror(1 + i, 1);
     }
 }
 
@@ -219,7 +219,7 @@ void UpdateEnemies()
                     farthest = cameraX + RESPAWN_AHEAD;
 
                 enemy[i].x = farthest + ENEMY_SPACING;
-                enemy[i].y = GROUND_Y;
+                enemy[i].y = GROUND_Y - 24;
                 break;
             }
         }
@@ -246,7 +246,7 @@ void UpdateBullets()
         for (int i = 0; i < ENEMY_MAX; i++) {
             int sx = enemy[i].x - cameraX;
             if (sx >= 0 && sx < 240) {
-                SpawnBullet(enemy[i].x, enemy[i].y);
+                SpawnBullet(enemy[i].x, enemy[i].y + 24);
             }
         }
         bulletTimer = 0;
