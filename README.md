@@ -1,17 +1,14 @@
-# GBA ƒQ[ƒ€
+# GBA ã‚²ãƒ¼ãƒ 
 
-## à–¾
-CŒ¾ŒêŠwK‚Ì‚½‚ß‚ÌƒQ[ƒ€ƒ{[ƒCEƒAƒhƒoƒ“ƒX(GBA) Œü‚¯‚ÌƒQ[ƒ€ŠJ”­ƒvƒƒWƒFƒNƒg‚Å‚·B
-“G‚Ì’e–‹‚ð”ð‚¯AUŒ‚‚µ‚ÄƒXƒRƒA‚ðã‚°‚é‚±‚Æ‚ª‘S•”‚ÌƒVƒ“ƒvƒ‹‚È‰¡ƒXƒNƒ[ƒ‹ƒQ[ƒ€‚Å‚·
+## èª¬æ˜Ž
+Cè¨€èªžå­¦ç¿’ã®ãŸã‚ã®ã‚²ãƒ¼ãƒ ãƒœãƒ¼ã‚¤ãƒ»ã‚¢ãƒ‰ãƒãƒ³ã‚¹(GBA) å‘ã‘ã‚²ãƒ¼ãƒ é–‹ç™ºãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã§ã™ã€‚
 
-## ƒXƒNƒŠ[ƒ“ƒVƒ‡ƒbƒg
-i¡Œã’Ç‰Á—\’èj
+## ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã‚·ãƒ§ãƒƒãƒˆ
+<img alt="screenshot1" src="https://github.com/user-attachments/assets/d295d18c-b7d1-4ccd-96d7-521ae4f890c1" />
+<img alt="screenshot2" src="https://github.com/user-attachments/assets/82b2a491-d7e6-4666-b193-c6372357bf44" />
+<img alt="screenshot3" src="https://github.com/user-attachments/assets/80c530bd-8529-4009-bcaf-67be6088fcb7" />
 
-## ƒrƒ‹ƒh•û–@
-```bash
-make
-```
 
-## ŽQl‚É‚µ‚½ƒEƒFƒuƒTƒCƒg
+## å‚è€ƒã«ã—ãŸè³‡æ–™
 https://akkera102.sakura.ne.jp/gbadev/<br>
 https://problemkaputt.de/gbatek.htm
