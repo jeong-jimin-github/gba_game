@@ -7,20 +7,6 @@ CŒ¾ŒêŠwK‚Ì‚½‚ß‚ÌƒQ[ƒ€ƒ{[ƒCEƒAƒhƒoƒ“ƒX(GBA) Œü‚¯‚ÌƒQ[ƒ€ŠJ”­ƒvƒƒWƒFƒNƒg‚Å‚·
 ## ƒXƒNƒŠ[ƒ“ƒVƒ‡ƒbƒg
 i¡Œã’Ç‰Á—\’èj
 
-## TODO
-EƒXƒRƒAWŒv‹@”\’Ç‰Á<br>
-EÅ‚ƒXƒRƒA•Û‘¶A•\Ž¦‹@”\’Ç‰Á<br>
-EƒLƒƒƒ‰ƒNƒ^[‚Ìƒhƒbƒg‚Ì•\Ž¦‚ª•sŽ©‘R<br>
-E•Ší‚ª‹A‚Á‚Ä‚­‚é“r’†‚Éã‰º‚Ék‚¦‚é[„‰Á‘¬“x”’l•ÏX<br>
-EŠÖ”–¼‚Ì“ˆê<br>
-E‰¼ƒƒCƒ“‰æ–ÊC³<br>
-E‰¼Ý’èC³<br>
-    EÝ’è„ƒ{ƒŠƒ…[ƒ€<br>
-    EÝ’è„“ïˆÕ“x<br>
-EUIƒAƒjƒ[ƒVƒ‡ƒ“’Ç‰Á<br>
-EFX’Ç‰Á<br>
-EƒƒCƒ“‰æ–ÊBGM’Ç‰Á<br>
-
 ## ƒrƒ‹ƒh•û–@
 ```bash
 make

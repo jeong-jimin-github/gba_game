@@ -63,6 +63,8 @@ const int FRICTION = 1; // –€ŽC‚É‚æ‚éŒ¸‘¬
 const int MOVE_ACC_WEAPON = 2; // •Ší‚ÌˆÚ“®‰Á‘¬“x
 const int MOVE_MAX_WEAPON = 6;
 
+int animtimer = 0;
+
 int cameraX = 0;
 int bulletTimer = 100;
 int enemyRespawnTimer = 0;
@@ -72,6 +74,7 @@ s32 px = 0;
 s32 py = GROUND_Y - 24;
 s32 vx = 0;
 s32 vy = 0;
+s32 iswalk = 0;
 s32 pLR = 1; // 0:¶ 1:‰E
 
 // ---------------- “GE’eˆÊ’u ----------------
@@ -200,7 +203,7 @@ void InitBullets()
         bullet[i].y = GROUND_Y;
 
         SpriteSetSize(11 + i, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
-        SpriteSetChr(11 + i, 96);
+        SpriteSetChr(11 + i, 72);
         SpriteMove(11 + i, 240, 160);
     }
 }
@@ -262,7 +265,7 @@ void UpdateBullets()
 void WeaponInit(Weapon* w)
 {
     w->isActive = 0;
-    SpriteSetSize(40, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetSize(40, OBJ_SIZE(2), OBJ_WIDE, OBJ_16_COLOR);
     SpriteSetChr(40, 64);
     w->x = px;
     w->y = py + 24;
@@ -394,9 +397,13 @@ void Game_Init(int scene)
 
     SpriteInit();
 
-    SpriteSetSize(50, OBJ_SIZE(3), OBJ_TALL, OBJ_16_COLOR);
+    SpriteSetSize(50, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
     SpriteSetChr (50, 0);
     SpriteMove   (50, px, py);
+
+    SpriteSetSize(51, OBJ_SIZE(2), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetChr (51, 16);
+    SpriteMove   (51, px, py + 32);
 
     InitEnemies();
     InitBullets();
@@ -427,16 +434,19 @@ void Game_Update()
     }
 
     if (key & KEY_RIGHT) {
+        iswalk = 1;
         pLR = 1;
         vx += MOVE_ACC;
         if (vx > MOVE_MAX) vx = MOVE_MAX;
     }
     else if (key & KEY_LEFT) {
+        iswalk = 1;
         pLR = 0;
         vx -= MOVE_ACC;
         if (vx < -MOVE_MAX) vx = -MOVE_MAX;
     }
     else {
+        iswalk = 0;
         if (vx > 0) vx -= FRICTION;
         else if (vx < 0) vx += FRICTION;
     }
@@ -470,9 +480,31 @@ void Game_Update()
 
     if(pLR == 0){
         SpriteMirror(50, 1);
+        SpriteMirror(51, 1);
     }
     if(pLR == 1){
         SpriteMirror(50, 0);
+        SpriteMirror(51, 0);
+    }
+
+    if(iswalk == 1){
+        animtimer++;
+        if(animtimer > 10){
+            if(animtimer > 20){
+                animtimer = 0;
+            }
+            else {
+                animtimer++;
+            }
+            SpriteSetChr(51, 16);
+        }
+        else{
+            SpriteSetChr(51, 80);
+        }
+    }
+    
+    else{
+        SpriteSetChr(51, 16);
     }
 
     UpdateEnemies();
@@ -487,6 +519,7 @@ void Game_Draw()
     if (currentScene != SCENE_GAME) return;
 
     SpriteMove(50, px - cameraX, py);
+    SpriteMove(51, px - cameraX, py + 32);
     SpriteMove(40, weapon.x - cameraX, weapon.y);
 
     for (int i = 0; i < ENEMY_MAX; i++) {
