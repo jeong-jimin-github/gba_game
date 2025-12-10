@@ -5,7 +5,8 @@ enum {
     SCENE_MENU = 0,
     SCENE_SETTING = 1,
     SCENE_CREDIT = 2,
-    SCENE_GAME = 3
+    SCENE_GAME = 3,
+    SCENE_MANUAL = 4
 };
 
 void Menu_Init(s32 scene);
@@ -23,6 +24,10 @@ void Credit_Draw();
 void Game_Init(s32 scene);
 void Game_Update();
 void Game_Draw();
+
+void Manual_Init(s32 scene);
+void Manual_Update();
+void Manual_Draw();
 
 extern void ChangeScene(s32 next);
 

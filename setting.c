@@ -22,6 +22,9 @@ void Setting_Init(int scene) {
             Mode3PutPixel(i, j, RGB5(0,0,0));
         }
     }
+    Mode3DrawString(&f, 60, 20, "Audio TEST", RGB5(31,31,31));
+    Mode3DrawString(&f, 60, 30, "L Button Main theme", RGB5(31,31,31));
+    Mode3DrawString(&f, 60, 40, "R Button Credit theme", RGB5(31,31,31));
     InitMusic();
 }
 
@@ -29,6 +32,7 @@ void Setting_Update() {
     if(currentScene != SCENE_SETTING) return;
 
     if(!(REG_KEYINPUT & KEY_B)) {
+        StopMusic();
         currentScene = SCENE_MENU;
         ChangeScene(currentScene);
     }
@@ -47,7 +51,4 @@ void Setting_Update() {
 
 void Setting_Draw() {
     if(currentScene != SCENE_SETTING) return;
-    Mode3DrawString(&f, 60, 20, "Audio TEST", RGB5(31,31,31));
-    Mode3DrawString(&f, 60, 30, "L Button Main theme", RGB5(31,31,31));
-    Mode3DrawString(&f, 60, 40, "R Button Credit theme", RGB5(31,31,31));
 }

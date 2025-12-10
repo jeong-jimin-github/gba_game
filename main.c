@@ -11,6 +11,7 @@ void ChangeScene(int next) {
     else if(next == SCENE_SETTING) Setting_Init(next);
     else if(next == SCENE_CREDIT) Credit_Init(next);
     else if(next == SCENE_GAME) Game_Init(next);
+    else if(next == SCENE_MANUAL) Manual_Init(next);
 }
 
 int main() {
@@ -21,13 +22,15 @@ int main() {
         WaitForVSync();
 
         if(currentScene == SCENE_MENU) Menu_Update();
-        if(currentScene == SCENE_SETTING) Setting_Update();
-        if(currentScene == SCENE_CREDIT) Credit_Update();
+        else if(currentScene == SCENE_SETTING) Setting_Update();
+        else if(currentScene == SCENE_CREDIT) Credit_Update();
         else if(currentScene == SCENE_GAME) Game_Update();
+        else if(currentScene == SCENE_MANUAL) Manual_Update();
 
         if(currentScene == SCENE_MENU) Menu_Draw();
         else if(currentScene == SCENE_SETTING) Setting_Draw();
         else if(currentScene == SCENE_CREDIT) Credit_Draw();
         else if(currentScene == SCENE_GAME) Game_Draw();
+        else if(currentScene == SCENE_MANUAL) Manual_Draw();
     }
 }
