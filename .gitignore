@@ -1,4 +1,5 @@
 test*.*
+/roms
 *.exe
 /obj
 /.vscode

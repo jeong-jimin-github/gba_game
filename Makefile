@@ -1,9 +1,10 @@
 MAKEFLAGS	+=--no-print-directory
 
 SHELL		= sh
-NAME		= test
-GAMECODE	= TEST
+NAME		= game
+GAMECODE	= GAME
 PREFIX		= arm-none-eabi-
+DATE		= $(shell date +%Y-%m-%d)
 
 AS			= $(PREFIX)as
 CC 			= $(PREFIX)gcc
@@ -14,10 +15,10 @@ OBJCOPY		= $(PREFIX)objcopy
 NM			= $(PREFIX)nm
 
 OBJDIR		= obj
-MAPFILE		= $(NAME).map
-NMFILE		= $(NAME).nm
-TARGET_ELF	= $(NAME).elf
-TARGET_BIN	= $(NAME).gba
+MAPFILE		= roms/$(NAME)-$(DATE).map
+NMFILE		= roms/$(NAME)-$(DATE).nm
+TARGET_ELF	= roms/$(NAME)-$(DATE).elf
+TARGET_BIN	= roms/$(NAME)-$(DATE).gba
 
 INCDIR	= . ./lib
 
