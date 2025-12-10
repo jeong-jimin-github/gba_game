@@ -1,8 +1,8 @@
 #include "lib/gba.h"
-#include "m3func.h"
+#include "commonfunc.h"
 #include "scene.h"
 
-int currentScene = SCENE_MENU;
+s32 currentScene = SCENE_MENU;
 
 void ChangeScene(int next) {
     currentScene = next;

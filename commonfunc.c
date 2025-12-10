@@ -1,5 +1,5 @@
 #include "lib/gba.h"
-#include "m3func.h"
+#include "commonfunc.h"
 
 void WaitForVSync(void) {
     while(*(vu16*)0x4000006 >= 160) {};

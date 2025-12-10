@@ -1,16 +1,16 @@
 #include "lib/gba.h"
 #include "scene.h"
-#include "m3func.h"
+#include "commonfunc.h"
 #include "sound.h"
 #include "res.h"
 #include "music.h"
 
-extern int currentScene;
+extern s32 currentScene;
 
 static ST_FONT f;
 static u16 prev_key_input_credit = 0;
 
-void Credit_Init(int scene) {
+void Credit_Init(s32 scene) {
     if(scene != SCENE_CREDIT) return;
 
     f.pDat  = (u8*)&k6x10Bitmap;
@@ -18,8 +18,8 @@ void Credit_Init(int scene) {
     f.cx    = 6;
     f.cy    = 10;
 
-    for(int i=0; i<240; i++){
-        for(int j=0; j<160; j++){
+    for(s32 i=0; i<240; i++){
+        for(s32 j=0; j<160; j++){
             Mode3PutPixel(i, j, RGB5(0,0,0));
         }
     }

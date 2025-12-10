@@ -1,10 +1,10 @@
 #include "lib/gba.h"
 #include "scene.h"
-#include "m3func.h"
+#include "commonfunc.h"
 #include "res.h"
 #include "sound.h"
 
-extern int currentScene;
+extern s32 currentScene;
 
 static ST_FONT f_JP;
 static int cursor = 0;

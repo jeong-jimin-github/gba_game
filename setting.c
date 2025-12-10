@@ -1,18 +1,19 @@
 #include "lib/gba.h"
 #include "scene.h"
-#include "m3func.h"
+#include "commonfunc.h"
+#include "sound.h"
+#include "music.h"
 #include "res.h"
 
-extern int currentScene;
-static ST_FONT f_JP;
+extern s32 currentScene;
+static ST_FONT f;
+MUSIC_PLAYER music;
 
 void Setting_Init(int scene) {
-    f_JP.pDat  = (u8*)&mplus_j10rBitmap;
-    f_JP.imgCx = 69630 + 2;
-    f_JP.cx    = 10;
-    f_JP.cy    = 11;
-    f_JP.pSheet= (u16*)&mplus_jfnt_txt;
-    f_JP.cnt   = 6963;
+    f.pDat  = (u8*)&k6x10Bitmap;
+    f.imgCx = 960;
+    f.cx    = 6;
+    f.cy    = 10;
 
     if(scene != SCENE_SETTING) return;
 
@@ -21,7 +22,7 @@ void Setting_Init(int scene) {
             Mode3PutPixel(i, j, RGB5(0,0,0));
         }
     }
-
+    InitMusic();
 }
 
 void Setting_Update() {
@@ -31,10 +32,22 @@ void Setting_Update() {
         currentScene = SCENE_MENU;
         ChangeScene(currentScene);
     }
+    if(!(REG_KEYINPUT & KEY_L)) {
+        StopMusic();
+        InitMusic();
+        music = UnrealSuperHero3;
+    }
+    if(!(REG_KEYINPUT & KEY_R)) {
+        StopMusic();
+        InitMusic();
+        music = Owen;
+    }
+    PlayMusic(&music);
 }
 
 void Setting_Draw() {
     if(currentScene != SCENE_SETTING) return;
-    Mode3DrawSJISStr(&f_JP, 5, 0, "ê›íË", RGB5(31,31,31));
-    Mode3DrawSJISStr(&f_JP, 5, 30, "äJî≠é“ÉÇÅ[Éh", RGB5(31,31,31));
+    Mode3DrawString(&f, 60, 20, "Audio TEST", RGB5(31,31,31));
+    Mode3DrawString(&f, 60, 30, "L Button Main theme", RGB5(31,31,31));
+    Mode3DrawString(&f, 60, 40, "R Button Credit theme", RGB5(31,31,31));
 }

@@ -1,5 +1,5 @@
-#ifndef _M3FUNC_H_
-#define _M3FUNC_H_
+#ifndef _COMMONFUNC_H_
+#define _COMMONFUNC_H_
 
 typedef struct {
     u8*  pDat;
@@ -21,4 +21,4 @@ void Mode3DrawSJISStr(ST_FONT* f_JP, s32 sx, s32 sy, char* str, u16 col);
 void Mode3DrawString(ST_FONT* font, s32 sx, s32 sy, char* str, u16 color);
 void Mode3DrawChar(ST_FONT* font, s32 sx, s32 sy, u16 chr, u16 color);
 
-#endif // _M3FUNC_H_
+#endif // _COMMONFUNC_H_

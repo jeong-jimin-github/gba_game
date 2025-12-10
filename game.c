@@ -1,6 +1,6 @@
 #include "lib/gba.h"
 #include "scene.h"
-#include "m3func.h"
+#include "commonfunc.h"
 #include "res.h"
 #include "gameres.h"
 #include "sound.h"
@@ -15,6 +15,18 @@
 #define ENEMY_SPACING     240 // 敵の出現間隔
 #define ENEMY_DESPAWN_L   120 // 敵の消える位置
 #define RESPAWN_AHEAD     320 // 敵の再出現位置（X座標）
+
+#define GROUND_Y 104
+#define GRAV_ACC 1
+#define JUMP_VEL -14
+#define MAX_FALL 10
+
+#define MOVE_ACC 1 // 移動加速度
+#define MOVE_MAX 3
+#define FRICTION 1 // 摩擦による減速
+
+#define MOVE_ACC_WEAPON 2 // 武器の移動加速度
+#define MOVE_MAX_WEAPON 6
 
 //---------------- 構造体定義 ----------------
 
@@ -31,7 +43,7 @@ typedef struct
     s32 vx;
     s32 vy;
     s32 LR; // 0:左 1:右
-    int isActive;
+    s32 isActive;
 } Weapon;
 
 typedef struct {
@@ -49,25 +61,13 @@ static ST_FONT f_JP; // 日本語フォント
 Weapon weapon;
 ST_BG Bg[BG_MAX_CNT];
 
-extern int currentScene;
+extern s32 currentScene;
 
-const int GROUND_Y = 104;
-const int GRAV_ACC = 1;
-const int JUMP_VEL = -14;
-const int MAX_FALL = 10;
+s32 animtimer = 0;
 
-const int MOVE_ACC = 1; // 移動加速度
-const int MOVE_MAX = 3;
-const int FRICTION = 1; // 摩擦による減速
-
-const int MOVE_ACC_WEAPON = 2; // 武器の移動加速度
-const int MOVE_MAX_WEAPON = 6;
-
-int animtimer = 0;
-
-int cameraX = 0;
-int bulletTimer = 100;
-int enemyRespawnTimer = 0;
+s32 cameraX = 0;
+s32 bulletTimer = 100;
+s32 enemyRespawnTimer = 0;
 
 // ---------------- プレイヤー位置・速度 ----------------
 s32 px = 0;
@@ -185,7 +185,7 @@ void SpriteInit(void)
 
 void InitEnemies()
 {
-    for (int i = 0; i < ENEMY_MAX; i++) {
+    for (s32 i = 0; i < ENEMY_MAX; i++) {
         enemy[i].x = 200 + ENEMY_SPACING * i;
         enemy[i].y = GROUND_Y - 24;
 
@@ -198,7 +198,7 @@ void InitEnemies()
 
 void InitBullets()
 {
-    for (int i = 0; i < BULLET_MAX; i++) {
+    for (s32 i = 0; i < BULLET_MAX; i++) {
         bullet[i].x = cameraX - 1000;
         bullet[i].y = GROUND_Y;
 
@@ -212,11 +212,11 @@ void UpdateEnemies()
 {
     if (enemyRespawnTimer > 300) {
         s32 farthest = enemy[0].x;
-        for (int i = 1; i < ENEMY_MAX; i++) {
+        for (s32 i = 1; i < ENEMY_MAX; i++) {
             if (enemy[i].x > farthest) farthest = enemy[i].x;
         }
 
-        for (int i = 0; i < ENEMY_MAX; i++) {
+        for (s32 i = 0; i < ENEMY_MAX; i++) {
             if (enemy[i].x < cameraX - ENEMY_DESPAWN_L) {
                 if (farthest < cameraX + RESPAWN_AHEAD)
                     farthest = cameraX + RESPAWN_AHEAD;
@@ -232,7 +232,7 @@ void UpdateEnemies()
 
 void SpawnBullet(s32 ex, s32 ey)
 {
-    for (int i = 0; i < BULLET_MAX; i++) {
+    for (s32 i = 0; i < BULLET_MAX; i++) {
         if (bullet[i].x < cameraX - 60) {
             bullet[i].x = ex;
             bullet[i].y = ey;
@@ -246,8 +246,8 @@ void UpdateBullets()
     bulletTimer++;
 
     if (bulletTimer >= 100) {
-        for (int i = 0; i < ENEMY_MAX; i++) {
-            int sx = enemy[i].x - cameraX;
+        for (s32 i = 0; i < ENEMY_MAX; i++) {
+            s32 sx = enemy[i].x - cameraX;
             if (sx >= 0 && sx < 240) {
                 SpawnBullet(enemy[i].x, enemy[i].y + 24);
             }
@@ -255,7 +255,7 @@ void UpdateBullets()
         bulletTimer = 0;
     }
 
-    for (int i = 0; i < BULLET_MAX; i++) {
+    for (s32 i = 0; i < BULLET_MAX; i++) {
         bullet[i].x -= 1;
     }
 }
@@ -307,11 +307,11 @@ void WeaponUpdate(Weapon* w)
             w->vx += MOVE_ACC_WEAPON;
             if (w->vx > MOVE_MAX) w->vx = MOVE_MAX_WEAPON;
         }
-        if(w->y < py + 16){
+        if(w->y < py + 32){
             w->vy += MOVE_ACC_WEAPON;
             if (w->vy > MOVE_MAX_WEAPON) w->vy = MOVE_MAX_WEAPON;
         }
-        if (w->y > py + 16)
+        if (w->y > py + 32)
         {
             w->vy -= MOVE_ACC_WEAPON;
             if (w->vy < -MOVE_MAX_WEAPON) w->vy = -MOVE_MAX_WEAPON;
@@ -335,8 +335,8 @@ void GameOver()
 {
     StopMusic();
     SetMode(MODE_3 | BG2_ENABLE);
-    for (int i = 0; i < 240; i++)
-        for (int j = 0; j < 160; j++)
+    for (s32 i = 0; i < 240; i++)
+        for (s32 j = 0; j < 160; j++)
             Mode3PutPixel(i, j, RGB5(0,0,0));
     Mode3DrawString(&f, 90, 70, "Game Over", RGB5(31,31,31));
     Mode3DrawSJISStr(&f_JP, 10, 90, "もう一度プレイ", RGB5(31,31,31));
@@ -360,7 +360,7 @@ void GameOver()
 
 //---------------- ゲーム初期化・更新・描画 ----------------
 
-void Game_Init(int scene)
+void Game_Init(s32 scene)
 {
     SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP | BG0_ON);
     f_JP.pDat  = (u8*)&mplus_j10rBitmap;
@@ -522,8 +522,8 @@ void Game_Draw()
     SpriteMove(51, px - cameraX, py + 32);
     SpriteMove(40, weapon.x - cameraX, weapon.y);
 
-    for (int i = 0; i < ENEMY_MAX; i++) {
-        int sx = enemy[i].x - cameraX;
+    for (s32 i = 0; i < ENEMY_MAX; i++) {
+        s32 sx = enemy[i].x - cameraX;
         if (sx < -32 || sx >= 240) {
             SpriteMove(1 + i, 240, 160);
         } else {
@@ -532,16 +532,16 @@ void Game_Draw()
     }
 
     if(weapon.isActive == 1 || weapon.isActive == 2){
-        for (int ii = 0; ii < ENEMY_MAX; ii++) {
-            if((weapon.x - cameraX < enemy[ii].x - cameraX +32 && weapon.x - cameraX > enemy[ii].x - cameraX) && (weapon.y >= enemy[ii].y && weapon.y < enemy[ii].y + 32))
+        for (s32 ii = 0; ii < ENEMY_MAX; ii++) {
+            if((weapon.x - cameraX < enemy[ii].x - cameraX + 32 && weapon.x - cameraX > enemy[ii].x - cameraX) && (weapon.y >= enemy[ii].y && weapon.y < enemy[ii].y + 32))
             {
                 enemy[ii].x = cameraX - ENEMY_DESPAWN_L - 100;
             }
         }
     }
 
-    for (int i = 0; i < BULLET_MAX; i++) {
-        int bx = bullet[i].x - cameraX;
+    for (s32 i = 0; i < BULLET_MAX; i++) {
+        s32 bx = bullet[i].x - cameraX;
         if (bx < -16 || bx >= 240) {
             SpriteMove(11 + i, 240, 160);
         } else {
@@ -549,9 +549,9 @@ void Game_Draw()
         }
     }
 
-    for (int i = 0; i < BULLET_MAX; i++) {
-        int bx = bullet[i].x - cameraX;
-        int by = bullet[i].y;
+    for (s32 i = 0; i < BULLET_MAX; i++) {
+        s32 bx = bullet[i].x - cameraX;
+        s32 by = bullet[i].y;
         if ((bx < px - cameraX +32 && bx > px - cameraX) && (by >= py && by < py + 32)) {
             GameOver();
         }

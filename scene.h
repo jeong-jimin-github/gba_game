@@ -8,22 +8,22 @@ enum {
     SCENE_GAME = 3
 };
 
-void Menu_Init(int scene);
+void Menu_Init(s32 scene);
 void Menu_Update();
 void Menu_Draw();
 
-void Setting_Init(int scene);
+void Setting_Init(s32 scene);
 void Setting_Update();
 void Setting_Draw();
 
-void Credit_Init(int scene);
+void Credit_Init(s32 scene);
 void Credit_Update();
 void Credit_Draw();
 
-void Game_Init(int scene);
+void Game_Init(s32 scene);
 void Game_Update();
 void Game_Draw();
 
-extern void ChangeScene(int next);
+extern void ChangeScene(s32 next);
 
 #endif
