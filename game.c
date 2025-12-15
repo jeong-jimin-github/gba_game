@@ -53,6 +53,14 @@ typedef struct {
     u16* tileBaseAdr;
 } ST_BG;
 
+typedef struct {
+    u32 startx;
+    u32 starty;
+    u32 endx;
+    u32 endy;
+} Block;
+
+
 //---------------- グローバル変数 ----------------
 
 static ST_FONT f; // ローマ字フォント
@@ -60,12 +68,14 @@ static ST_FONT f_JP; // 日本語フォント
 
 Weapon weapon;
 ST_BG Bg[BG_MAX_CNT];
+Block BLC[1];
 
 extern s32 currentScene;
 
 s32 animtimer = 0;
 
 s32 cameraX = 0;
+s32 cameraCtr = 0;
 s32 bulletTimer = 100;
 s32 enemyRespawnTimer = 0;
 
@@ -260,6 +270,54 @@ void UpdateBullets()
     }
 }
 
+void CheckBlockCollision()
+{
+    s32 player_left = px - cameraX;
+    s32 player_right = px + 32 - cameraX;
+    s32 player_top = py;
+    s32 player_bottom = py + 32;
+
+    for (s32 i = 0; i < 1; i++) {
+        s32 block_left = BLC[i].startx - cameraCtr;
+        s32 block_right = BLC[i].endx - cameraCtr;
+        s32 block_top = BLC[i].starty;
+        s32 block_bottom = BLC[i].endy;
+
+        if (player_right > block_left && player_left < block_right &&
+            player_bottom > block_top && player_top < block_bottom) {
+        
+            s32 overlap_left = player_right - block_left;
+            s32 overlap_right = block_right - player_left;
+            s32 overlap_top = player_bottom - block_top;
+            s32 overlap_bottom = block_bottom - player_top;
+
+            s32 min_overlap = overlap_left;
+            if (overlap_right < min_overlap) min_overlap = overlap_right;
+            if (overlap_top < min_overlap) min_overlap = overlap_top;
+            if (overlap_bottom < min_overlap) min_overlap = overlap_bottom;
+
+            // 上
+            if (min_overlap == overlap_top) {
+                py = block_top - 32;
+                vy = 0;
+            }
+            // 下
+            else if (min_overlap == overlap_bottom) {
+                py = block_bottom;
+                vy = 0;
+            }
+            // 左
+            else if (min_overlap == overlap_left) {
+                px = block_left - 32;
+            }
+            // 右
+            else if (min_overlap == overlap_right) {
+                px = block_right;
+            }
+        }
+    }
+}
+
 //---------------- 武器初期化・更新 ----------------
 
 void WeaponInit(Weapon* w)
@@ -388,12 +446,18 @@ void Game_Init(s32 scene)
     Bg0SetPal ((u16*)&bg0Pal);
     Bg0SetMap ((u16*)&ResBg0Map, BG0_MAP_SIZE/2);
 
+    BLC[0].startx = 104;
+    BLC[0].endx = 128;
+    BLC[0].starty = 32;
+    BLC[0].endy = 64;
+
     px = 0;
     py = GROUND_Y - 24;
     vx = 0;
     vy = 0;
 
     cameraX = 0;
+    cameraCtr = 0;
 
     SpriteInit();
 
@@ -471,9 +535,17 @@ void Game_Update()
         vy = 0;
     }
 
+    CheckBlockCollision();
+
     if (px - cameraX > 80) {
         cameraX = px - 80;
         if (cameraX < 0) cameraX = 0;
+        cameraCtr = cameraX;
+        while (cameraCtr > 256)
+        {
+            cameraCtr = cameraCtr - 256;
+        }
+        
         REG_BG0HOFS = cameraX;
     }
     enemyRespawnTimer++;
@@ -512,6 +584,10 @@ void Game_Update()
     WeaponUpdate(&weapon);
 
     PlayMusic(&UnrealSuperHero3);
+
+    char buf[256];
+    _Sprintf(buf, "x: %d, y: %d, cameraX: %d, cameractr: %d", px, py, cameraX, cameraCtr);
+    MgbaLog(buf);
 }
 
 void Game_Draw()

@@ -50,6 +50,7 @@ DFILES  = $(addprefix $(OBJDIR)/, $(addsuffix .d, $(basename $(notdir $(SFILES) 
 all: 
 	@make -C res
 	@make $(TARGET_BIN);
+	rm -f $(MAPFILE) $(NMFILE) $(TARGET_ELF)
 
 clean:
 	@make clean -C res
