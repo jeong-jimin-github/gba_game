@@ -79,6 +79,9 @@ s32 cameraCtr = 0;
 s32 bulletTimer = 100;
 s32 enemyRespawnTimer = 0;
 
+s32 canjump = 1;
+s32 canaction = 1;
+
 // ---------------- プレイヤー位置・速度 ----------------
 s32 px = 0;
 s32 py = GROUND_Y - 24;
@@ -365,11 +368,11 @@ void WeaponUpdate(Weapon* w)
             w->vx += MOVE_ACC_WEAPON;
             if (w->vx > MOVE_MAX) w->vx = MOVE_MAX_WEAPON;
         }
-        if(w->y < py + 32){
+        if(w->y < py + 24){
             w->vy += MOVE_ACC_WEAPON;
             if (w->vy > MOVE_MAX_WEAPON) w->vy = MOVE_MAX_WEAPON;
         }
-        if (w->y > py + 32)
+        if (w->y > py + 24)
         {
             w->vy -= MOVE_ACC_WEAPON;
             if (w->vy < -MOVE_MAX_WEAPON) w->vy = -MOVE_MAX_WEAPON;
@@ -479,8 +482,9 @@ void Game_Init(s32 scene)
 void Game_Update()
 {
     if (currentScene != SCENE_GAME) return;
+    u32 key = ~(REG_KEYINPUT);
 
-    if (!(REG_KEYINPUT & KEY_SELECT)) {
+    if (key& KEY_SELECT) {
         currentScene = SCENE_MENU;
         StopMusic();
         SetMode(MODE_3 | BG2_ENABLE);
@@ -488,13 +492,25 @@ void Game_Update()
         return;
     }
 
-    u32 key = ~(REG_KEYINPUT);
+    if ((key & KEY_A) && (canjump)) {
+        canjump = 0;
+        if (py == GROUND_Y - 24) vy = JUMP_VEL;
+    }
 
-    if(key & KEY_B) {
+    if(!canjump && (~(key) & KEY_A)){
+        canjump = 1;
+    }
+
+    if((key & KEY_B) && (canaction)) {
+        canaction = 0;
         if(weapon.isActive == 0){
             weapon.LR = pLR;
             weapon.isActive = 1;
         }
+    }
+
+    if(!canaction && (~(key) & KEY_B)){
+        canaction = 1;
     }
 
     if (key & KEY_RIGHT) {
@@ -519,10 +535,6 @@ void Game_Update()
 
     if(px-cameraX < 0) {
         px = cameraX;
-    }
-
-    if (key & KEY_A) {
-        if (py == GROUND_Y - 24) vy = JUMP_VEL;
     }
 
     vy += GRAV_ACC;
