@@ -68,18 +68,19 @@ static ST_FONT f_JP; // 日本語フォント
 
 Weapon weapon;
 ST_BG Bg[BG_MAX_CNT];
-Block BLC[1];
+Block BLC[2];
 
 extern s32 currentScene;
 
 s32 animtimer = 0;
 
 s32 cameraX = 0;
-s32 cameraCtr = 0;
+s32 cameraMap = 0;
 s32 bulletTimer = 100;
 s32 enemyRespawnTimer = 0;
 
 s32 canjump = 1;
+s32 isground = 1;
 s32 canaction = 1;
 
 // ---------------- プレイヤー位置・速度 ----------------
@@ -280,9 +281,9 @@ void CheckBlockCollision()
     s32 player_top = py;
     s32 player_bottom = py + 32;
 
-    for (s32 i = 0; i < 1; i++) {
-        s32 block_left = BLC[i].startx - cameraCtr;
-        s32 block_right = BLC[i].endx - cameraCtr;
+    for (s32 i = 0; i < 2; i++) {
+        s32 block_left = BLC[i].startx - cameraMap;
+        s32 block_right = BLC[i].endx - cameraMap;
         s32 block_top = BLC[i].starty;
         s32 block_bottom = BLC[i].endy;
 
@@ -307,15 +308,15 @@ void CheckBlockCollision()
             // 下
             else if (min_overlap == overlap_bottom) {
                 py = block_bottom;
-                vy = 0;
+                vy = -(vy/2);
             }
             // 左
             else if (min_overlap == overlap_left) {
-                px = block_left - 32;
+                px = block_left - 32 + cameraX;
             }
             // 右
             else if (min_overlap == overlap_right) {
-                px = block_right;
+                px = block_right + cameraX;
             }
         }
     }
@@ -449,10 +450,15 @@ void Game_Init(s32 scene)
     Bg0SetPal ((u16*)&bg0Pal);
     Bg0SetMap ((u16*)&ResBg0Map, BG0_MAP_SIZE/2);
 
-    BLC[0].startx = 104;
-    BLC[0].endx = 128;
+    BLC[0].startx = 96;
+    BLC[0].endx = 96 + (8 * 4);
     BLC[0].starty = 32;
     BLC[0].endy = 64;
+
+    BLC[1].startx = 224;
+    BLC[1].endx = 224 + (8 * 4);
+    BLC[1].starty = 32;
+    BLC[1].endy = 64;
 
     px = 0;
     py = GROUND_Y - 24;
@@ -460,7 +466,9 @@ void Game_Init(s32 scene)
     vy = 0;
 
     cameraX = 0;
-    cameraCtr = 0;
+    REG_BG0HOFS = cameraX;
+
+    cameraMap = 0;
 
     SpriteInit();
 
@@ -494,7 +502,7 @@ void Game_Update()
 
     if ((key & KEY_A) && (canjump)) {
         canjump = 0;
-        if (py == GROUND_Y - 24) vy = JUMP_VEL;
+        if (isground) vy = JUMP_VEL;
     }
 
     if(!canjump && (~(key) & KEY_A)){
@@ -548,16 +556,18 @@ void Game_Update()
     }
 
     CheckBlockCollision();
+    if (vy==0) {
+        isground = 1;
+    }
+    else {
+        isground = 0;
+    }
 
     if (px - cameraX > 80) {
         cameraX = px - 80;
+        cameraMap = cameraX;
         if (cameraX < 0) cameraX = 0;
-        cameraCtr = cameraX;
-        while (cameraCtr > 256)
-        {
-            cameraCtr = cameraCtr - 256;
-        }
-        
+        while (cameraMap > 256) cameraMap = cameraMap - 256;
         REG_BG0HOFS = cameraX;
     }
     enemyRespawnTimer++;
@@ -598,7 +608,7 @@ void Game_Update()
     PlayMusic(&UnrealSuperHero3);
 
     char buf[256];
-    _Sprintf(buf, "x: %d, y: %d, cameraX: %d, cameractr: %d", px, py, cameraX, cameraCtr);
+    _Sprintf(buf, "x: %d, y: %d, cameraX: %d", px, py, cameraX);
     MgbaLog(buf);
 }
 
