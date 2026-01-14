@@ -51,6 +51,8 @@ all:
 	@make -C res
 	@make $(TARGET_BIN);
 	rm -f $(MAPFILE) $(NMFILE) $(TARGET_ELF)
+	@echo "Running GBA ROM with default emulator..."
+	@xdg-open $(TARGET_BIN) || echo "Failed to open the emulator."
 clean:
 	@make clean -C res
 	rm -f $(OFILES) $(DFILES) $(MAPFILE) $(NMFILE) $(TARGET_ELF) $(TARGET_BIN)
