@@ -3,8 +3,8 @@
 #include "commonfunc.h"
 #include "res.h"
 #include "gameres.h"
-#include "sound.h"
-#include "music.h"
+#include <maxmod.h>
+#include "soundbank.h"
 
 //---------------- 定数定義 ----------------
 
@@ -27,6 +27,9 @@
 
 #define MOVE_ACC_WEAPON 2 // 武器の移動加速度
 #define MOVE_MAX_WEAPON 6
+
+void irqDisable(int);
+void irqEnable(int);
 
 //---------------- 構造体定義 ----------------
 
@@ -62,9 +65,6 @@ typedef struct {
 
 
 //---------------- グローバル変数 ----------------
-
-static ST_FONT f; // ローマ字フォント
-static ST_FONT f_JP; // 日本語フォント
 
 Weapon weapon;
 ST_BG Bg[BG_MAX_CNT];
@@ -395,7 +395,22 @@ void WeaponUpdate(Weapon* w)
 
 void GameOver()
 {
-    StopMusic();
+    mmStop();
+    irqDisable(IRQ_VBLANK);
+    static ST_FONT f; // ローマ字フォント
+    static ST_FONT f_JP; // 日本語フォント
+    f_JP.pDat  = (u8*)&mplus_j10rBitmap;
+    f_JP.imgCx = 69632;
+    f_JP.cx    = 10;
+    f_JP.cy    = 11;
+    f_JP.pSheet= (u16*)&mplus_jfnt_txt;
+    f_JP.cnt   = 6963;
+
+    f.pDat  = (u8*)&k6x10Bitmap;
+    f.imgCx = 960;
+    f.cx    = 6;
+    f.cy    = 10;
+
     SetMode(MODE_3 | BG2_ENABLE);
     for (s32 i = 0; i < 240; i++)
         for (s32 j = 0; j < 160; j++)
@@ -415,6 +430,7 @@ void GameOver()
         }
 
         if (key & KEY_START) {
+            irqEnable(IRQ_VBLANK);
             Game_Init(SCENE_GAME);
             break;
     }}
@@ -425,18 +441,6 @@ void GameOver()
 void Game_Init(s32 scene)
 {
     SetMode(MODE_0 | OBJ_ENABLE | OBJ_1D_MAP | BG0_ON);
-    f_JP.pDat  = (u8*)&mplus_j10rBitmap;
-    f_JP.imgCx = 69632;
-    f_JP.cx    = 10;
-    f_JP.cy    = 11;
-    f_JP.pSheet= (u16*)&mplus_jfnt_txt;
-    f_JP.cnt   = 6963;
-
-    f.pDat  = (u8*)&k6x10Bitmap;
-    f.imgCx = 960;
-    f.cx    = 6;
-    f.cy    = 10;
-
     if (scene != SCENE_GAME) return;
 
     u16* oam = OBJ_BASE_ADR;
@@ -483,8 +487,7 @@ void Game_Init(s32 scene)
     InitEnemies();
     InitBullets();
     WeaponInit(&weapon);
-
-    InitMusic();
+    mmStart( MOD_UNREEEAL_SUPERHERO_3, MM_PLAY_LOOP );
 }
 
 void Game_Update()
@@ -493,8 +496,8 @@ void Game_Update()
     u32 key = ~(REG_KEYINPUT);
 
     if (key& KEY_SELECT) {
+        mmStop();
         currentScene = SCENE_MENU;
-        StopMusic();
         SetMode(MODE_3 | BG2_ENABLE);
         ChangeScene(currentScene);
         return;
@@ -604,12 +607,6 @@ void Game_Update()
     UpdateEnemies();
     UpdateBullets();
     WeaponUpdate(&weapon);
-
-    PlayMusic(&UnrealSuperHero3);
-
-    char buf[256];
-    _Sprintf(buf, "x: %d, y: %d, cameraX: %d", px, py, cameraX);
-    MgbaLog(buf);
 }
 
 void Game_Draw()

@@ -2,7 +2,6 @@
 #include "scene.h"
 #include "commonfunc.h"
 #include "res.h"
-#include "sound.h"
 
 extern s32 currentScene;
 
@@ -12,7 +11,7 @@ static u16 prev_key_input = 0;
 
 void Menu_Init(int scene) {
     if(scene != SCENE_MENU) return;
-
+    
     f_JP.pDat  = (u8*)&mplus_j10rBitmap;
     f_JP.imgCx = 69630 + 2;
     f_JP.cx    = 10;
@@ -31,20 +30,16 @@ void Menu_Update() {
 
     if(pressed_keys & KEY_UP) {
         if(cursor > 0) {
-            PlayFX(7);
             cursor--;
         }
         else {
-            PlayFX(0);
         }
     }
     if(pressed_keys & KEY_DOWN) {
         if(cursor < 3){
-            PlayFX(7);
             cursor++;
         }
         else {
-            PlayFX(0);
         }
     }
 

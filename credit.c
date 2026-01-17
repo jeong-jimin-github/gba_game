@@ -1,9 +1,9 @@
 #include "lib/gba.h"
 #include "scene.h"
 #include "commonfunc.h"
-#include "sound.h"
 #include "res.h"
-#include "music.h"
+#include <maxmod.h>
+#include "soundbank.h"
 
 extern s32 currentScene;
 
@@ -23,22 +23,19 @@ void Credit_Init(s32 scene) {
             Mode3PutPixel(i, j, RGB5(0,0,0));
         }
     }
-
+    mmStart( MOD_UNREEEAL_SUPERHERO_3, MM_PLAY_LOOP );
     Mode3DrawString(&f, 60, 50, "Made by Jeong Jimin", RGB5(31,31,31));
     Mode3DrawString(&f, 5, 80, "github.com/jeong-jimin-github/gba_game", RGB5(31,31,31));
-    InitMusic();
 }
 
 void Credit_Update() {
     if(currentScene != SCENE_CREDIT) return;
 
-    PlayMusic(&Owen);
-
     u16 current_key_input = REG_KEYINPUT;
     u16 pressed_keys = ~current_key_input & prev_key_input_credit; 
 
     if(pressed_keys & KEY_B) {
-        StopMusic();
+        mmStop();
         ChangeScene(SCENE_MENU);
     }
 

@@ -1,0 +1,4 @@
+#define MOD_UNREEEAL_SUPERHERO_3	0
+#define MSL_NSONGS	1
+#define MSL_NSAMPS	15
+#define MSL_BANKSIZE	16

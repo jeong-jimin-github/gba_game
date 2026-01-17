@@ -1,9 +1,7 @@
 #include "lib/gba.h"
 #include "scene.h"
 #include "commonfunc.h"
-#include "sound.h"
 #include "res.h"
-#include "music.h"
 
 extern s32 currentScene;
 
@@ -40,19 +38,15 @@ void Manual_Init(s32 scene) {
     Mode3DrawString(&f, 20,40, "B", RGB5(31,31,31));
     Mode3DrawString(&f, 20,55, "SELECT", RGB5(31,31,31));
 
-    InitMusic();
 }
 
 void Manual_Update() {
     if(currentScene != SCENE_MANUAL) return;
 
-    PlayMusic(&Owen);
-
     u16 current_key_input = REG_KEYINPUT;
     u16 pressed_keys = ~current_key_input & prev_key_input_manual; 
 
     if(pressed_keys & KEY_B) {
-        StopMusic();
         ChangeScene(SCENE_MENU);
     }
 

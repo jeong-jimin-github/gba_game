@@ -1,13 +1,13 @@
-# GBA ã‚²ãƒ¼ãƒ 
+# GBA ƒQ[ƒ€
 
-## èª¬æ˜Ž
-Cè¨€èªžå­¦ç¿’ã®ãŸã‚ã®ã‚²ãƒ¼ãƒ ãƒœãƒ¼ã‚¤ãƒ»ã‚¢ãƒ‰ãƒãƒ³ã‚¹(GBA) å‘ã‘ã‚²ãƒ¼ãƒ é–‹ç™ºãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã§ã™ã€‚
+## à–¾
+CŒ¾ŒêŠwK‚Ì‚½‚ß‚ÌƒQ[ƒ€ƒ{[ƒCEƒAƒhƒoƒ“ƒX(GBA) Œü‚¯ƒQ[ƒ€ŠJ”­ƒvƒƒWƒFƒNƒg‚Å‚·B
 
-## ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã‚·ãƒ§ãƒƒãƒˆ
+## ƒXƒNƒŠ[ƒ“ƒVƒ‡ƒbƒg
 <img alt="screenshot2" src="https://github.com/user-attachments/assets/82b2a491-d7e6-4666-b193-c6372357bf44" />
 <img alt="screenshot3" src="https://github.com/user-attachments/assets/80c530bd-8529-4009-bcaf-67be6088fcb7" />
 
 
-## å‚è€ƒã«ã—ãŸè³‡æ–™
+## ŽQl‚É‚µ‚½Ž‘—¿
 https://akkera102.sakura.ne.jp/gbadev/<br>
 https://problemkaputt.de/gbatek.htm

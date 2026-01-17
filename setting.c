@@ -1,13 +1,11 @@
 #include "lib/gba.h"
 #include "scene.h"
 #include "commonfunc.h"
-#include "sound.h"
-#include "music.h"
 #include "res.h"
 
 extern s32 currentScene;
 static ST_FONT f;
-MUSIC_PLAYER music;
+static u16 prev_key_input_setting = 0;
 
 void Setting_Init(int scene) {
     f.pDat  = (u8*)&k6x10Bitmap;
@@ -23,30 +21,19 @@ void Setting_Init(int scene) {
         }
     }
     Mode3DrawString(&f, 60, 20, "Audio TEST", RGB5(31,31,31));
-    Mode3DrawString(&f, 60, 30, "L Button Main theme", RGB5(31,31,31));
-    Mode3DrawString(&f, 60, 40, "R Button Credit theme", RGB5(31,31,31));
-    InitMusic();
 }
 
 void Setting_Update() {
     if(currentScene != SCENE_SETTING) return;
 
-    if(!(REG_KEYINPUT & KEY_B)) {
-        StopMusic();
-        currentScene = SCENE_MENU;
-        ChangeScene(currentScene);
+    u16 current_key_input = REG_KEYINPUT;
+    u16 pressed_keys = ~current_key_input & prev_key_input_setting; 
+
+    if(pressed_keys & KEY_B) {
+        ChangeScene(SCENE_MENU);
     }
-    if(!(REG_KEYINPUT & KEY_L)) {
-        StopMusic();
-        InitMusic();
-        music = UnrealSuperHero3;
-    }
-    if(!(REG_KEYINPUT & KEY_R)) {
-        StopMusic();
-        InitMusic();
-        music = Owen;
-    }
-    PlayMusic(&music);
+
+    prev_key_input_setting = current_key_input;
 }
 
 void Setting_Draw() {

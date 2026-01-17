@@ -1,90 +1,91 @@
-MAKEFLAGS	+=--no-print-directory
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment.")
+endif
 
-SHELL		= sh
-NAME		= game
-GAMECODE	= GAME
-PREFIX		= arm-none-eabi-
-DATE		= $(shell date +%Y-%m-%d)
+include $(DEVKITARM)/gba_rules
 
-AS			= $(PREFIX)as
-CC 			= $(PREFIX)gcc
-CPP			= $(PREFIX)g++
-LD 			= $(PREFIX)g++
-AR 			= $(PREFIX)ar
-OBJCOPY		= $(PREFIX)objcopy
-NM			= $(PREFIX)nm
+MAKEFLAGS   += --no-print-directory
+NAME        = game
+GAMECODE    = GAME
+DATE        = $(shell date +%Y-%m-%d)
+OBJDIR      = obj
+ROMDIR      = roms
+MUSIC_DIR   = music
 
-OBJDIR		= obj
-MAPFILE		= roms/$(NAME)-$(DATE).map
-NMFILE		= roms/$(NAME)-$(DATE).nm
-TARGET_ELF	= roms/$(NAME)-$(DATE).elf
-TARGET_BIN	= roms/$(NAME)-$(DATE).gba
+#---------------------------------------------------------------------------------
+INCLUDES    = -I. -I./lib -I$(DEVKITPRO)/libgba/include -I$(OBJDIR)
+LIBDIRS     = -L$(DEVKITPRO)/libgba/lib -L$(DEVKITPRO)/libgba/lib/gba
+LIBS        = -lmm -lgba
 
-INCDIR	= . ./lib
+SFILES  = $(wildcard res/*.s) $(filter-out lib/crt0.s, $(wildcard lib/*.s)) $(wildcard *.s)
+CFILES  = $(wildcard res/*.c) $(wildcard lib/*.c) $(wildcard *.c)
 
-SFILES	= \
-	$(wildcard res/*.s) \
-	$(wildcard snd/*.s) \
-	$(wildcard lib/*.s) \
-	$(wildcard *.s) \
+AUDIOFILES := $(wildcard $(MUSIC_DIR)/*.*)
+ifneq ($(strip $(AUDIOFILES)),)
+    BINFILES := soundbank.bin
+endif
 
-CFILES	= \
-	$(wildcard res/*.c) \
-	$(wildcard snd/*.c) \
-	$(wildcard lib/*.c) \
-	$(wildcard *.c) \
+#---------------------------------------------------------------------------------
+ARCH    := -mcpu=arm7tdmi -mtune=arm7tdmi -mthumb -mthumb-interwork
+CFLAGS  := -g -O3 $(ARCH) -fomit-frame-pointer -ffast-math -Wall $(INCLUDES)
+ASFLAGS := -g $(ARCH)
+LDFLAGS = -g $(ARCH) -Wl,-Map,$(MAPFILE) -specs=gba.specs $(LIBDIRS)
 
-VPATH = $(dir $(CFILES) $(SFILES))
+TARGET_ELF  = $(ROMDIR)/$(NAME)-$(DATE).elf
+TARGET_BIN  = $(ROMDIR)/$(NAME)-$(DATE).gba
+MAPFILE     = $(ROMDIR)/$(NAME)-$(DATE).map
+NMFILE      = $(ROMDIR)/$(NAME)-$(DATE).nm
 
-#=============================================================================
+OFILES_SOURCES := $(addprefix $(OBJDIR)/, $(notdir $(SFILES:.s=.o) $(CFILES:.c=.o)))
+OFILES_BIN     := $(addprefix $(OBJDIR)/, $(addsuffix .o, $(BINFILES)))
+OFILES         := $(OFILES_SOURCES) $(OFILES_BIN)
 
-ASFLAGS = 
-LDFLAGS = -Map $(MAPFILE) -Wall -specs=gba.specs -nostartfiles
-CFLAGS  = -g -O3 -mcpu=arm7tdmi -mtune=arm7tdmi -fomit-frame-pointer -ffast-math -Wall -W -Wshadow -Wno-unused-parameter -Wno-strict-aliasing $(foreach incdir,$(INCDIR),-I$(incdir))
-OFILES  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(notdir $(SFILES) $(CFILES)))))
-DFILES  = $(addprefix $(OBJDIR)/, $(addsuffix .d, $(basename $(notdir $(SFILES) $(CFILES)))))
+VPATH := $(dir $(SFILES) $(CFILES))
 
-#=============================================================================
+#---------------------------------------------------------------------------------
+.PHONY: all clean res_build
 
-.PHONY: all clean
-all: 
-	@make -C res
-	@make $(TARGET_BIN);
-	rm -f $(MAPFILE) $(NMFILE) $(TARGET_ELF)
-	@echo "Running GBA ROM with default emulator..."
-	@xdg-open $(TARGET_BIN) || echo "Failed to open the emulator."
-clean:
-	@make clean -C res
-	rm -f $(OFILES) $(DFILES) $(MAPFILE) $(NMFILE) $(TARGET_ELF) $(TARGET_BIN)
+all: $(ROMDIR) $(OBJDIR) res_build $(TARGET_BIN)
+	@echo Build Complete: $(TARGET_BIN)
 
-$(TARGET_BIN): $(TARGET_ELF)
-	@$(PREFIX)objcopy -v -O binary $< $@
-	@gbafix $@ -t$(NAME) -c$(GAMECODE)
-	@padbin 256 $@
-
-$(TARGET_ELF): $(OBJDIR) $(OFILES)  Makefile
-	@echo \# Linking $@
-	@echo > $(MAPFILE)
-	@$(LD) -o $@ $(OFILES) -Wl,$(LDFLAGS)
-	@$(NM) -n $@ > $(NMFILE)
-
-$(OBJDIR):
+$(ROMDIR) $(OBJDIR):
 	@[ -d $@ ] || mkdir -p $@
 
-#=============================================================================
+res_build:
+	@$(MAKE) -C res
 
-.SUFFIXES: .s .c .o .d
+clean:
+	@$(MAKE) clean -C res
+	rm -rf $(OBJDIR) $(ROMDIR)
+	rm -f soundbank.bin soundbank.h soundbank_bin.h
 
-$(OBJDIR)/%.arm.o: %.arm.c
-	@echo \# compiling $<
-	@$(CC) -MMD -MP -MF $(OBJDIR)/$*.arm.d $(CFLAGS) -marm -c $< -o $@
+$(TARGET_BIN): $(TARGET_ELF)
+	@$(OBJCOPY) -v -O binary $< $@
+	@gbafix $@ -t$(NAME) -c$(GAMECODE)
+
+$(TARGET_ELF): $(OFILES)
+	@echo # Linking $@
+	@$(CC) $(OFILES) $(LDFLAGS) $(LIBS) -o $@
+
+soundbank.bin soundbank.h : $(AUDIOFILES)
+	@echo # Generating Soundbank from $(MUSIC_DIR)
+	@mmutil $^ -osoundbank.bin -hsoundbank.h
+
+$(OBJDIR)/soundbank.bin.o $(OBJDIR)/soundbank_bin.h : soundbank.bin
+	@echo # Converting soundbank.bin to object and header
+	@$(bin2o)
+	@mv soundbank.bin.o $(OBJDIR)/
+	@mv soundbank_bin.h $(OBJDIR)/
+
+$(OFILES_SOURCES): soundbank.h $(OBJDIR)/soundbank_bin.h
 
 $(OBJDIR)/%.o: %.c
-	@echo \# compiling $<
-	@$(CC) -MMD -MP -MF $(OBJDIR)/$*.d $(CFLAGS) -mthumb -c $< -o $@
+	@echo # compiling $<
+	@$(CC) -MMD -MP -MF $(OBJDIR)/$*.d $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o: %.s
-	@echo \# assembling $<
-	@$(CC) -MMD -MP -MF $(OBJDIR)/$*.d -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
+	@echo # assembling $<
+	@$(CC) $(ASFLAGS) -c $< -o $@
 
--include $(DFILES)
+-include $(OBJDIR)/*.d
