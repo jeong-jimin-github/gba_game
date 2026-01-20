@@ -21,9 +21,21 @@ jobs:
         DEVKITPRO: /opt/devkitpro
         DEVKITARM: /opt/devkitpro/devkitARM
     
+    - name: Get latest tag
+      id: get_tag
+      run: |
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0")
+        echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+        # バージョンをパースして0.1加算
+        VERSION=${LATEST_TAG#v}
+        NEW_VERSION=$(echo "$VERSION + 0.1" | bc)
+        echo "new_tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+    
     - name: Create Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: ${{ steps.get_tag.outputs.new_tag }}
         files: |
           roms/*.gba
       env:
