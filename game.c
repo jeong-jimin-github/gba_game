@@ -83,6 +83,9 @@ s32 canjump = 1;
 s32 isground = 1;
 s32 canaction = 1;
 
+u32 player_score = 0;
+u32 player_heart = 3;
+
 // ---------------- プレイヤー位置・速度 ----------------
 s32 px = 0;
 s32 py = GROUND_Y - 24;
@@ -484,6 +487,19 @@ void Game_Init(s32 scene)
     SpriteSetChr (51, 16);
     SpriteMove   (51, px, py + 32);
 
+    // ハートHUDスプライト
+    SpriteSetSize(52, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetChr (52, 76);
+    SpriteMove   (52, 30, 10); // 1個目
+
+    SpriteSetSize(53, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetChr (53, 76);
+    SpriteMove   (53, 50, 10); // 2個目
+
+    SpriteSetSize(54, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
+    SpriteSetChr (54, 76);
+    SpriteMove   (54, 70, 10); // 3個目
+
     InitEnemies();
     InitBullets();
     WeaponInit(&weapon);
@@ -630,6 +646,7 @@ void Game_Draw()
         for (s32 ii = 0; ii < ENEMY_MAX; ii++) {
             if((weapon.x - cameraX < enemy[ii].x - cameraX + 32 && weapon.x - cameraX > enemy[ii].x - cameraX) && (weapon.y >= enemy[ii].y && weapon.y < enemy[ii].y + 32))
             {
+                player_score += 100;
                 enemy[ii].x = cameraX - ENEMY_DESPAWN_L - 100;
             }
         }
@@ -648,7 +665,17 @@ void Game_Draw()
         s32 bx = bullet[i].x - cameraX;
         s32 by = bullet[i].y;
         if ((bx < px - cameraX +32 && bx > px - cameraX) && (by >= py && by < py + 32)) {
-            GameOver();
+            player_heart--;
+            if(player_heart == 2){
+                SpriteMove(54, 240, 160);
+            }
+            if(player_heart == 1){
+                SpriteMove(53, 240, 160);
+            }
+            if(player_heart == 0){
+                GameOver();
+            }
+            bullet[i].x = cameraX - 1000;
         }
     }
 }
