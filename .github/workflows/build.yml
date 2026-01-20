@@ -9,17 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest
     
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Install devkitpro
-      run: |
-        wget https://apt.devkitpro.org/install-devkitpro-pacman
-        chmod +x ./install-devkitpro-pacman
-        sudo ./install-devkitpro-pacman
-        sudo dkp-pacman -Syu --noconfirm
-        sudo dkp-pacman -S gba-dev --noconfirm
     
     - name: Build GBA
       run: make
