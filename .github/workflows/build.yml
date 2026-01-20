@@ -37,8 +37,8 @@ jobs:
 
     - name: Build project
       env:
-        DEVKITPRO: ${{ home.devkitpro }}
-        DEVKITARM: ${{ home.devkitpro }}/devkitARM
+        DEVKITPRO: $HOME/devkitpro
+        DEVKITARM: $HOME/devkitpro/devkitARM
       run: |
         make clean
         make
