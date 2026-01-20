@@ -44,10 +44,16 @@ jobs:
         name: gba-game
         path: roms/*.gba
 
-    - name: Upload GBA file to release
+    - name: Install GitHub CLI
       if: github.event_name == 'release'
-      uses: actions/github-release@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        files: roms/*.gba
-        draft: false
+      run: |
+        sudo apt-get install -y gh
+        echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+    - name: Upload GBA file to GitHub Release
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        GBA_FILE=$(ls roms/*.gba)
+        gh release upload "$GITHUB_REF_NAME" "$GBA_FILE"
