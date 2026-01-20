@@ -17,22 +17,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up environment
-      env:
-        DEVKITPRO: /opt/devkitpro
-        DEVKITARM: /opt/devkitpro/devkitARM
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git build-essential
-        wget https://github.com/devkitPro/installer/releases/latest/download/devkitpro-pacman.deb
-        sudo dpkg -i devkitpro-pacman.deb
-        sudo dkp-pacman -Syu --noconfirm
-        sudo dkp-pacman -S gba-dev --noconfirm
+    - name: Set up devkitPro
+      uses: devkitPro/github-action@master
 
     - name: Build project
-      env:
-        DEVKITPRO: /opt/devkitpro
-        DEVKITARM: /opt/devkitpro/devkitARM
       run: |
         make clean
         make

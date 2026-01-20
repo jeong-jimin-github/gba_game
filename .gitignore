@@ -3,3 +3,5 @@ test*.*
 *.exe
 /obj
 /.vscode
+soundbank.bin
+soundbank.h
