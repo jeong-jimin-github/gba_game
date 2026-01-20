@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up environment
       env:
@@ -39,14 +39,14 @@ jobs:
 
     - name: Upload GBA file as artifact
       if: github.event_name == 'push'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: gba-game
         path: roms/*.gba
 
     - name: Upload GBA file to release
       if: github.event_name == 'release'
-      uses: actions/github-release@v1.1.0
+      uses: actions/github-release@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         files: roms/*.gba
