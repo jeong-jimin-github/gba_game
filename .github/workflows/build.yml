@@ -28,7 +28,7 @@ jobs:
         echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
         # バージョンをパースして0.1加算
         VERSION=${LATEST_TAG#v}
-        NEW_VERSION=$(python3 -c "print(f'{float('$VERSION') + 0.1:.1f}')")
+        NEW_VERSION=$(python3 -c "print(round(float('$VERSION') + 0.1, 1))")
         echo "new_tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
     
     - name: Create Release
