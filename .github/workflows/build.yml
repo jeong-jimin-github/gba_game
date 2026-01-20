@@ -20,16 +20,15 @@ jobs:
     - name: Set up devkitPro
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget
-        cd /tmp
-        wget https://apt.devkitpro.org/devkitpro-pacman.keyring.gpg
-        wget https://apt.devkitpro.org/devkitpro-keyring.gpg
-        sudo mkdir -p /usr/share/keyrings
-        sudo mv devkitpro-pacman.keyring.gpg /usr/share/keyrings/
-        sudo mv devkitpro-keyring.gpg /usr/share/keyrings/
-        echo "deb [signed-by=/usr/share/keyrings/devkitpro-keyring.gpg] https://apt.devkitpro.org stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
-        sudo apt-get update
-        sudo apt-get install -y devkitpro-gba-dev
+        sudo apt-get install -y git build-essential
+        git clone https://github.com/devkitPro/docker-gba-dev.git /tmp/docker-gba-dev
+        cd /tmp/docker-gba-dev
+        docker build -t devkitpro-gba . || \
+        (sudo mkdir -p /opt/devkitpro && \
+         sudo apt-get install -y ca-certificates && \
+         cd /opt/devkitpro && \
+         sudo git clone https://github.com/devkitPro/buildscripts.git && \
+         cd buildscripts && sudo bash gba-tools.sh)
 
     - name: Build project
       env:
