@@ -20,20 +20,25 @@ jobs:
     - name: Set up devkitPro
       run: |
         sudo apt-get update
-        sudo apt-get install -y git build-essential
-        git clone https://github.com/devkitPro/docker-gba-dev.git /tmp/docker-gba-dev
-        cd /tmp/docker-gba-dev
-        docker build -t devkitpro-gba . || \
-        (sudo mkdir -p /opt/devkitpro && \
-         sudo apt-get install -y ca-certificates && \
-         cd /opt/devkitpro && \
-         sudo git clone https://github.com/devkitPro/buildscripts.git && \
-         cd buildscripts && sudo bash gba-tools.sh)
+        sudo apt-get install -y build-essential git
+        mkdir -p $HOME/devkitpro
+        cd $HOME/devkitpro
+        git config --global url."https://".insteadOf git://
+        git clone --depth 1 https://github.com/devkitPro/buildscripts.git || true
+        if [ -f buildscripts/gba-tools.sh ]; then
+          cd buildscripts
+          bash gba-tools.sh
+        else
+          echo "Using fallback: installing arm-none-eabi-gcc"
+          sudo apt-get install -y arm-none-eabi-gcc arm-none-eabi-binutils arm-none-eabi-newlib
+          sudo mkdir -p /opt/devkitpro/devkitARM/bin
+          sudo ln -sf /usr/bin/arm-none-eabi-gcc /opt/devkitpro/devkitARM/bin/ || true
+        fi
 
     - name: Build project
       env:
-        DEVKITPRO: /opt/devkitpro
-        DEVKITARM: /opt/devkitpro/devkitARM
+        DEVKITPRO: ${{ home.devkitpro }}
+        DEVKITARM: ${{ home.devkitpro }}/devkitARM
       run: |
         make clean
         make
