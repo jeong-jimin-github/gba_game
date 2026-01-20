@@ -219,7 +219,7 @@ void InitBullets()
         bullet[i].x = cameraX - 1000;
         bullet[i].y = GROUND_Y;
 
-        SpriteSetSize(11 + i, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
+        SpriteSetSize(11 + i, OBJ_SIZE(2), OBJ_WIDE, OBJ_16_COLOR);
         SpriteSetChr(11 + i, 72);
         SpriteMove(11 + i, 240, 160);
     }
@@ -472,6 +472,9 @@ void Game_Init(s32 scene)
     vx = 0;
     vy = 0;
 
+    player_heart = 3;
+    player_score = 0;
+
     cameraX = 0;
     REG_BG0HOFS = cameraX;
 
@@ -489,15 +492,15 @@ void Game_Init(s32 scene)
 
     // ハートHUDスプライト
     SpriteSetSize(52, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
-    SpriteSetChr (52, 76);
+    SpriteSetChr (52, 132);
     SpriteMove   (52, 30, 10); // 1個目
 
     SpriteSetSize(53, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
-    SpriteSetChr (53, 76);
+    SpriteSetChr (53, 132);
     SpriteMove   (53, 50, 10); // 2個目
 
     SpriteSetSize(54, OBJ_SIZE(1), OBJ_SQUARE, OBJ_16_COLOR);
-    SpriteSetChr (54, 76);
+    SpriteSetChr (54, 132);
     SpriteMove   (54, 70, 10); // 3個目
 
     InitEnemies();
