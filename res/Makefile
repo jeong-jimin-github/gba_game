@@ -10,11 +10,17 @@ SFILES	= \
 	$(BMPFILES:.bmp=.s) \
 	$(PNGFILES:.png=.s)
 
+OFILES	= $(SFILES:.s=.o)
+OBJDIR	= ../obj
+
 #=============================================================================
-all: $(SFILES);
+all: $(OBJDIR) $(SFILES) $(addprefix $(OBJDIR)/, $(OFILES));
+
+$(OBJDIR):
+	@[ -d $@ ] || mkdir -p $@
 
 clean:
-	rm -f $(SFILES) $(HFILES)
+	rm -f $(SFILES) $(HFILES) $(OFILES)
 
 .SUFFIXES: .S .s .c .o .a .d .bmp .png .txt .bin
 
@@ -33,3 +39,6 @@ clean:
 %.s: %.png
 	@echo \# converting $<
 	@grit $< -ff$*.grit
+
+$(OBJDIR)/%.o: %.s
+	@arm-none-eabi-gcc -g -mcpu=arm7tdmi -mtune=arm7tdmi -mthumb -mthumb-interwork -c $< -o $@

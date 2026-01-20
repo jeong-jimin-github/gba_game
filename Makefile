@@ -18,8 +18,11 @@ INCLUDES    = -I. -I./lib -I$(DEVKITPRO)/libgba/include -I$(OBJDIR)
 LIBDIRS     = -L$(DEVKITPRO)/libgba/lib -L$(DEVKITPRO)/libgba/lib/gba
 LIBS        = -lmm -lgba
 
-SFILES  = $(wildcard res/*.s) $(filter-out lib/crt0.s, $(wildcard lib/*.s)) $(wildcard *.s)
+SFILES  = $(filter-out res/%, $(wildcard res/*.s)) $(filter-out lib/crt0.s, $(wildcard lib/*.s)) $(wildcard *.s)
 CFILES  = $(wildcard res/*.c) $(wildcard lib/*.c) $(wildcard *.c)
+
+# Explicitly define resource object files
+RES_OFILES = obj/bg0.o obj/k6x10.o obj/menubg.o obj/mplus_j10r.o obj/mplus_jfnt.o obj/spr1.o obj/spr2.o
 
 AUDIOFILES := $(wildcard $(MUSIC_DIR)/*.*)
 ifneq ($(strip $(AUDIOFILES)),)
@@ -39,14 +42,14 @@ NMFILE      = $(ROMDIR)/$(NAME)-$(DATE).nm
 
 OFILES_SOURCES := $(addprefix $(OBJDIR)/, $(notdir $(SFILES:.s=.o) $(CFILES:.c=.o)))
 OFILES_BIN     := $(addprefix $(OBJDIR)/, $(addsuffix .o, $(BINFILES)))
-OFILES         := $(OFILES_SOURCES) $(OFILES_BIN)
+OFILES         := $(OFILES_SOURCES) $(OFILES_BIN) $(RES_OFILES)
 
 VPATH := $(dir $(SFILES) $(CFILES))
 
 #---------------------------------------------------------------------------------
 .PHONY: all clean res_build
 
-all: $(ROMDIR) $(OBJDIR) res_build $(TARGET_BIN)
+all: $(ROMDIR) $(OBJDIR) $(TARGET_BIN)
 	@echo Build Complete: $(TARGET_BIN)
 
 $(ROMDIR) $(OBJDIR):
@@ -64,7 +67,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 	@$(OBJCOPY) -v -O binary $< $@
 	@gbafix $@ -t$(NAME) -c$(GAMECODE)
 
-$(TARGET_ELF): $(OFILES)
+$(TARGET_ELF): res_build $(OFILES)
 	@echo # Linking $@
 	@$(CC) $(OFILES) $(LDFLAGS) $(LIBS) -o $@
 
