@@ -19,14 +19,17 @@ jobs:
 
     - name: Set up devkitPro
       run: |
-        sudo mkdir -p /opt/devkitpro
-        sudo chmod 777 /opt/devkitpro
+        sudo apt-get update
+        sudo apt-get install -y wget
         cd /tmp
-        wget https://github.com/devkitPro/devkitpro-pacman/releases/download/v3.0.3/devkitpro-pacman.amd64.deb || \
-        wget https://github.com/devkitPro/installer/releases/download/v3.0.3/devkitpro-pacman.deb
-        sudo dpkg -i devkitpro-pacman.deb
-        sudo dkp-pacman -Syu --noconfirm
-        sudo dkp-pacman -S gba-dev --noconfirm
+        wget https://apt.devkitpro.org/devkitpro-pacman.keyring.gpg
+        wget https://apt.devkitpro.org/devkitpro-keyring.gpg
+        sudo mkdir -p /usr/share/keyrings
+        sudo mv devkitpro-pacman.keyring.gpg /usr/share/keyrings/
+        sudo mv devkitpro-keyring.gpg /usr/share/keyrings/
+        echo "deb [signed-by=/usr/share/keyrings/devkitpro-keyring.gpg] https://apt.devkitpro.org stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
+        sudo apt-get update
+        sudo apt-get install -y devkitpro-gba-dev
 
     - name: Build project
       env:
