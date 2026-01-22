@@ -16,6 +16,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Build GBA
       run: make
@@ -26,9 +28,9 @@ jobs:
     - name: Get latest tag
       id: get_tag
       run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
         LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0")
         echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-        # バージョンをパースして0.1加算
         VERSION=${LATEST_TAG#v}
         NEW_VERSION=$(python3 -c "print(round(float('$VERSION') + 0.1, 1))")
         echo "new_tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
