@@ -15,18 +15,18 @@ void irqSet(int, void (*)(void));
 void ChangeScene(int next) {
     currentScene = next;
 
-    if(next == SCENE_MENU) {Menu_Init(next); irqDisable(IRQ_VBLANK);}
-    else if(next == SCENE_SETTING) {Setting_Init(next); irqDisable(IRQ_VBLANK);}
-    else if(next == SCENE_CREDIT) {Credit_Init(next); irqEnable(IRQ_VBLANK);}
-    else if(next == SCENE_GAME) {Game_Init(next); irqEnable(IRQ_VBLANK);}
-    else if(next == SCENE_MANUAL) {Manual_Init(next); irqDisable(IRQ_VBLANK);}
+    if(next == SCENE_MENU) {irqDisable(IRQ_VBLANK); Menu_Init(next);}
+    else if(next == SCENE_SETTING) {irqDisable(IRQ_VBLANK); Setting_Init(next);}
+    else if(next == SCENE_CREDIT) {irqEnable(IRQ_VBLANK); Credit_Init(next);}
+    else if(next == SCENE_GAME) {irqEnable(IRQ_VBLANK); Game_Init(next);}
+    else if(next == SCENE_MANUAL) {irqDisable(IRQ_VBLANK); Manual_Init(next);}
 }
 
 int main() {
     SetMode(MODE_3 | BG2_ENABLE);
 
     irqInit();
-    mmInitDefault( (void*)soundbank_bin, 10 );
+    mmInitDefault( (void*)soundbank_bin, 32 );
 
     irqSet(IRQ_VBLANK, mmVBlank);
     irqEnable(IRQ_VBLANK);

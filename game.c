@@ -506,7 +506,7 @@ void Game_Init(s32 scene)
     InitEnemies();
     InitBullets();
     WeaponInit(&weapon);
-    mmStart( MOD_UNREEEAL_SUPERHERO_3, MM_PLAY_LOOP );
+    mmStart( MOD_YOKAIDISCO, MM_PLAY_LOOP );
 }
 
 void Game_Update()
