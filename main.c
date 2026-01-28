@@ -15,7 +15,7 @@ void irqSet(int, void (*)(void));
 void ChangeScene(int next) {
     currentScene = next;
 
-    if(next == SCENE_MENU) {irqDisable(IRQ_VBLANK); Menu_Init(next);}
+    if(next == SCENE_MENU) {irqEnable(IRQ_VBLANK); Menu_Init(next);}
     else if(next == SCENE_SETTING) {irqDisable(IRQ_VBLANK); Setting_Init(next);}
     else if(next == SCENE_CREDIT) {irqEnable(IRQ_VBLANK); Credit_Init(next);}
     else if(next == SCENE_GAME) {irqEnable(IRQ_VBLANK); Game_Init(next);}

@@ -2,12 +2,48 @@
 #include "scene.h"
 #include "commonfunc.h"
 #include "res.h"
+#include <maxmod.h>
+#include "soundbank.h"
 
 extern s32 currentScene;
 
 static ST_FONT f_JP;
+static int lastest_cursor = 0;
 static int cursor = 0;
 static u16 prev_key_input = 0;
+
+void Change_Menu() {
+    if(lastest_cursor == 0){
+        Mode3DrawSJISStr(&f_JP, 100,100, "スタート", RGB5(0,0,0));
+    }
+    if(lastest_cursor == 1){
+        Mode3DrawSJISStr(&f_JP, 100,115, "設定", RGB5(0,0,0));
+    }
+    if(lastest_cursor == 2){
+        Mode3DrawSJISStr(&f_JP, 100,130, "クレジット", RGB5(0,0,0));
+    }
+    if(lastest_cursor == 3){
+        Mode3DrawSJISStr(&f_JP, 100,145, "操作方法", RGB5(0,0,0));
+    }
+
+    if (cursor == 0)
+    {
+        Mode3DrawSJISStr(&f_JP, 100,100, "スタート", RGB5(31, 0, 0));
+    }
+    if (cursor == 1)
+    {
+        Mode3DrawSJISStr(&f_JP, 100,115, "設定", RGB5(31, 0, 0));
+    }
+    if (cursor == 2)
+    {
+        Mode3DrawSJISStr(&f_JP, 100,130, "クレジット", RGB5(31, 0, 0));
+    }
+    if (cursor == 3)
+    {
+        Mode3DrawSJISStr(&f_JP, 100,145, "操作方法", RGB5(31, 0, 0));
+    }
+    lastest_cursor = cursor;
+}
 
 void Menu_Init(int scene) {
     if(scene != SCENE_MENU) return;
@@ -20,6 +56,13 @@ void Menu_Init(int scene) {
     f_JP.cnt   = 6963;
 
     Mode3DrawImage(0,0, menubgBitmap);
+
+    Mode3DrawSJISStr(&f_JP, 100,100, "スタート", RGB5(0,0,0));
+    Mode3DrawSJISStr(&f_JP, 100,115, "設定", RGB5(0,0,0));
+    Mode3DrawSJISStr(&f_JP, 100,130, "クレジット", RGB5(0,0,0));
+    Mode3DrawSJISStr(&f_JP, 100,145, "操作方法", RGB5(0,0,0));
+    mmStart( MOD_SECONDHEAVEN, MM_PLAY_LOOP );
+    Change_Menu();
 }
 
 void Menu_Update() {
@@ -31,6 +74,7 @@ void Menu_Update() {
     if(pressed_keys & KEY_UP) {
         if(cursor > 0) {
             cursor--;
+            Change_Menu();
         }
         else {
         }
@@ -38,12 +82,14 @@ void Menu_Update() {
     if(pressed_keys & KEY_DOWN) {
         if(cursor < 3){
             cursor++;
+            Change_Menu();
         }
         else {
         }
     }
 
     if(pressed_keys & KEY_A) {
+        mmStop();
         if(cursor == 0) {
             currentScene = SCENE_GAME;
             ChangeScene(currentScene);
@@ -64,14 +110,5 @@ void Menu_Update() {
 
 void Menu_Draw() {
     if(currentScene != SCENE_MENU) return;
-
-    u16 col_s = (cursor==0)? RGB5(31, 0, 0) : RGB5(0, 0, 0);
-    u16 col_t = (cursor==1)? RGB5(31, 0, 0) : RGB5(0, 0, 0);
-    u16 col_c = (cursor==2)? RGB5(31, 0, 0) : RGB5(0, 0, 0);
-    u16 col_m = (cursor==3)? RGB5(31, 0, 0) : RGB5(0, 0, 0);
-
-    Mode3DrawSJISStr(&f_JP, 100,100, "スタート", col_s);
-    Mode3DrawSJISStr(&f_JP, 100,115, "設定", col_t);
-    Mode3DrawSJISStr(&f_JP, 100,130, "クレジット", col_c);
-    Mode3DrawSJISStr(&f_JP, 100,145, "操作方法", col_m);
 }
+
